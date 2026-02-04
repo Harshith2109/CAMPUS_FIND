@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 /**
  * User Schema
- * Represents students, staff, and administrators
+ * Represents students/users and administrators
  */
 const userSchema = new mongoose.Schema({
     name: {
@@ -20,8 +20,8 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true,
         match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            'Please provide a valid email'
+            /^[a-zA-Z0-9._-]+@rvce\.edu\.in$/,
+            'Please use your RVCE email (yourname@rvce.edu.in)'
         ]
     },
     password: {
@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'staff', 'admin'],
+        enum: ['user', 'admin'],
         default: 'user'
     },
     phone: {
@@ -47,7 +47,15 @@ const userSchema = new mongoose.Schema({
     },
     verified: {
         type: Boolean,
-        default: true // Set to false if email verification is required
+        default: false // User must verify email first
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false // Email verification status
+    },
+    isBanned: {
+        type: Boolean,
+        default: false
     },
     createdAt: {
         type: Date,
@@ -109,6 +117,7 @@ userSchema.methods.getPublicProfile = function () {
         phone: this.phone,
         department: this.department,
         verified: this.verified,
+        isBanned: this.isBanned,
         createdAt: this.createdAt
     };
 };

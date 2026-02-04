@@ -155,3 +155,29 @@ exports.sendClaimStatusUpdate = async (user, claim, item, status) => {
         html
     });
 };
+/**
+ * Send OTP email for email verification
+ */
+exports.sendOtpEmail = async (email, otp) => {
+    const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #3b82f6;">Email Verification Required 🔐</h2>
+      <p>Hi,</p>
+      <p>You have requested to register with CampusFind. To complete your registration, please verify your email address.</p>
+      <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center;">
+        <p style="color: #6b7280; margin-bottom: 10px;">Your One-Time Password (OTP):</p>
+        <p style="font-size: 32px; font-weight: bold; color: #3b82f6; letter-spacing: 5px; margin: 0;">${otp}</p>
+        <p style="color: #9ca3af; margin-top: 10px; font-size: 12px;">This OTP will expire in 10 minutes</p>
+      </div>
+      <p><strong>Important:</strong> Do not share this OTP with anyone. CampusFind staff will never ask for your OTP.</p>
+      <p style="margin-top: 30px;">If you did not request this OTP, please ignore this email.</p>
+      <p style="margin-top: 30px;">Best regards,<br>The CampusFind Team</p>
+    </div>
+  `;
+
+    return await this.sendEmail({
+        to: email,
+        subject: 'CampusFind Email Verification - OTP',
+        html
+    });
+};

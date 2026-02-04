@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getItems } from '../services/itemService';
 import ItemCard from '../components/ItemCard';
@@ -15,11 +15,7 @@ const ItemList = () => {
         location: ''
     });
 
-    useEffect(() => {
-        fetchItems();
-    }, [filters]);
-
-    const fetchItems = async () => {
+    const fetchItems = useCallback(async () => {
         try {
             setLoading(true);
             const data = await getItems(filters);
@@ -29,7 +25,11 @@ const ItemList = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters]);
+
+    useEffect(() => {
+        fetchItems();
+    }, [fetchItems]);
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));

@@ -59,9 +59,33 @@ export const updateItemStatus = async (itemId, status) => {
 };
 
 /**
- * Get recent activity
+ * Create a new user
  */
-export const getRecentActivity = async (limit = 50) => {
-    const response = await api.get(`/admin/activity?limit=${limit}`);
+export const createUser = async (userData) => {
+    const response = await api.post('/admin/users', userData);
+    return response.data;
+};
+
+/**
+ * Toggle user ban status
+ */
+export const toggleUserBan = async (userId) => {
+    const response = await api.patch(`/admin/users/${userId}/ban`);
+    return response.data;
+};
+
+/**
+ * Get system settings
+ */
+export const getSettings = async () => {
+    const response = await api.get('/admin/settings');
+    return response.data;
+};
+
+/**
+ * Update system settings
+ */
+export const updateSettings = async (settingsData) => {
+    const response = await api.put('/admin/settings', settingsData);
     return response.data;
 };

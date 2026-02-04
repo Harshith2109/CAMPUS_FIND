@@ -1,11 +1,27 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { register as registerService } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
+import { register as registerService, verifyOtp, resendOtp } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
+
+// RVCE Departments
+const DEPARTMENTS = [
+    { value: '', label: '-- Select Department --' },
+    { value: 'Computer Science', label: 'Computer Science & Engineering' },
+    { value: 'Electronics', label: 'Electronics & Communication Engineering' },
+    { value: 'Mechanical', label: 'Mechanical Engineering' },
+    { value: 'Electrical', label: 'Electrical & Electronics Engineering' },
+    { value: 'Civil', label: 'Civil Engineering' },
+    { value: 'Aerospace', label: 'Aerospace Engineering' },
+    { value: 'Biomedical', label: 'Biomedical Engineering' },
+    { value: 'Information Science', label: 'Information Science & Engineering' },
+    { value: 'Administration', label: 'Administration' },
+    { value: 'Other', label: 'Other' }
+];
 
 const Register = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const [step, setStep] = useState('register'); // 'register' or 'verify-otp'
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -14,8 +30,11 @@ const Register = () => {
         phone: '',
         department: ''
     });
+    const [otp, setOtp] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [registeredEmail, setRegisteredEmail] = useState('');
+    const [otpResendCountdown, setOtpResendCountdown] = useState(0);
 
     const handleChange = (e) => {
         setFormData({
@@ -34,20 +53,22 @@ const Register = () => {
             return;
         }
 
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+        if (!passwordRegex.test(formData.password)) {
+            setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
             return;
         }
 
         setLoading(true);
 
         try {
-            const { confirmPassword, ...registerData } = formData;
+            const { confirmPassword: _, ...registerData } = formData;
             const data = await registerService(registerData);
 
-            if (data.success) {
-                login(data.user, data.token);
-                navigate('/dashboard');
+            if (data.success && data.requiresEmailVerification) {
+                setRegisteredEmail(data.email);
+                setStep('verify-otp');
+                setOtpResendCountdown(0);
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
@@ -55,6 +76,152 @@ const Register = () => {
             setLoading(false);
         }
     };
+
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (!otp || otp.length !== 6) {
+            setError('Please enter a valid 6-digit OTP');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const data = await verifyOtp(registeredEmail, otp);
+
+            if (data.success && data.token) {
+                login(data.user, data.token);
+                navigate('/dashboard');
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'OTP verification failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        setError('');
+        setLoading(true);
+
+        try {
+            const data = await resendOtp(registeredEmail);
+
+            if (data.success) {
+                setOtp('');
+                setOtpResendCountdown(60);
+                // Countdown timer
+                const interval = setInterval(() => {
+                    setOtpResendCountdown((prev) => {
+                        if (prev <= 1) {
+                            clearInterval(interval);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (step === 'verify-otp') {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-md w-full">
+                    <div className="bg-white rounded-2xl shadow-xl p-8">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <span className="text-white font-bold text-2xl">CF</span>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900">Verify Email</h2>
+                            <p className="text-gray-600 mt-2">Enter the OTP sent to your email</p>
+                        </div>
+
+                        {/* Error Message */}
+                        {error && (
+                            <div className="mb-4 p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-lg text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        {/* Email Display */}
+                        <div className="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                            <p className="text-sm text-gray-600 mb-1">Verification code sent to:</p>
+                            <p className="text-base font-semibold text-primary-700 truncate">{registeredEmail}</p>
+                        </div>
+
+                        {/* OTP Form */}
+                        <form onSubmit={handleVerifyOtp} className="space-y-6">
+                            <div>
+                                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
+                                    One-Time Password (OTP) *
+                                </label>
+                                <input
+                                    id="otp"
+                                    name="otp"
+                                    type="text"
+                                    maxLength="6"
+                                    required
+                                    className="input text-center text-2xl tracking-widest"
+                                    placeholder="000000"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Enter the 6-digit code</p>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading || otp.length !== 6}
+                                className="w-full btn btn-primary py-3 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? 'Verifying...' : 'Verify OTP'}
+                            </button>
+                        </form>
+
+                        {/* Resend OTP */}
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-gray-600 mb-3">Didn't receive the code?</p>
+                            {otpResendCountdown > 0 ? (
+                                <p className="text-sm text-gray-500">
+                                    Resend available in {otpResendCountdown}s
+                                </p>
+                            ) : (
+                                <button
+                                    onClick={handleResendOtp}
+                                    disabled={loading || otpResendCountdown > 0}
+                                    className="text-primary-600 hover:text-primary-700 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Resend OTP
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Back to Register */}
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={() => {
+                                    setStep('register');
+                                    setError('');
+                                    setOtp('');
+                                }}
+                                className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                            >
+                                Back to Registration
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -96,7 +263,7 @@ const Register = () => {
 
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address *
+                                RVCE Email Address *
                             </label>
                             <input
                                 id="email"
@@ -104,10 +271,11 @@ const Register = () => {
                                 type="email"
                                 required
                                 className="input"
-                                placeholder="you@example.com"
+                                placeholder="yourname@rvce.edu.in"
                                 value={formData.email}
                                 onChange={handleChange}
                             />
+                            <p className="text-xs text-gray-500 mt-1">Must be your RVCE email</p>
                         </div>
 
                         <div>
@@ -129,15 +297,19 @@ const Register = () => {
                             <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">
                                 Department
                             </label>
-                            <input
+                            <select
                                 id="department"
                                 name="department"
-                                type="text"
                                 className="input"
-                                placeholder="Computer Science"
                                 value={formData.department}
                                 onChange={handleChange}
-                            />
+                            >
+                                {DEPARTMENTS.map((dept) => (
+                                    <option key={dept.value} value={dept.value}>
+                                        {dept.label}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>

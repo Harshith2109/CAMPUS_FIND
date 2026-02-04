@@ -25,23 +25,7 @@ const itemSchema = new mongoose.Schema({
     category: {
         type: String,
         required: [true, 'Please select a category'],
-        enum: [
-            'Electronics',
-            'Wallet/Purse',
-            'Keys',
-            'ID Card',
-            'Books/Notes',
-            'Clothing',
-            'Bags/Backpacks',
-            'Jewelry',
-            'Sports Equipment',
-            'Stationery',
-            'Water Bottle',
-            'Umbrella',
-            'Glasses',
-            'Watch',
-            'Other'
-        ]
+        trim: true
     },
     location: {
         type: String,

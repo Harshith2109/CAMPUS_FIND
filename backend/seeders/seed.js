@@ -9,23 +9,15 @@ const Notification = require('../models/Notification');
 const users = [
     {
         name: 'Admin User',
-        email: 'admin@campusfind.com',
+        email: 'harshithhs.sit25@rvce.edu.in',
         password: 'admin123',
         role: 'admin',
         phone: '9876543210',
         department: 'Administration'
     },
     {
-        name: 'Staff Member',
-        email: 'staff@campusfind.com',
-        password: 'staff123',
-        role: 'staff',
-        phone: '9876543211',
-        department: 'Security'
-    },
-    {
         name: 'Priya Sharma',
-        email: 'priya@student.com',
+        email: 'priya@rvce.edu.in',
         password: 'user123',
         role: 'user',
         phone: '9876543212',
@@ -33,7 +25,7 @@ const users = [
     },
     {
         name: 'Rahul Kumar',
-        email: 'rahul@student.com',
+        email: 'rahul@rvce.edu.in',
         password: 'user123',
         role: 'user',
         phone: '9876543213',
@@ -41,7 +33,7 @@ const users = [
     },
     {
         name: 'Anita Desai',
-        email: 'anita@student.com',
+        email: 'anita@rvce.edu.in',
         password: 'user123',
         role: 'user',
         phone: '9876543214',
@@ -323,7 +315,6 @@ const seedDatabase = async () => {
         console.log('\n✨ Database seeding completed successfully!\n');
         console.log('📝 Sample Credentials:');
         console.log('   Admin: admin@campusfind.com / admin123');
-        console.log('   Staff: staff@campusfind.com / staff123');
         console.log('   User:  priya@student.com / user123\n');
 
         process.exit(0);

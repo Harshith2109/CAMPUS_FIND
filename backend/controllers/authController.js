@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const emailService = require('../services/emailService');
+const otpService = require('../services/otpService');
 
 /**
  * @desc    Register a new user
@@ -10,6 +11,23 @@ exports.register = async (req, res, next) => {
     try {
         const { name, email, password, phone, department, role } = req.body;
 
+        // Strong password regex
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
+            });
+        }
+
+        // Validate email domain
+        if (!email || !email.endsWith('@rvce.edu.in')) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please use your RVCE email address (yourname@rvce.edu.in)'
+            });
+        }
+
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -19,15 +37,75 @@ exports.register = async (req, res, next) => {
             });
         }
 
-        // Create user
+        // Create user (not verified yet)
         const user = await User.create({
             name,
             email,
             password,
             phone,
             department,
-            role: role || 'user' // Default to 'user' role
+            role: role || 'user', // Default to 'user' role
+            isEmailVerified: false // Email not verified yet
         });
+
+        // Generate and send OTP
+        const otpResult = await otpService.createOTP(email);
+        if (otpResult.success) {
+            await emailService.sendOtpEmail(email, otpResult.otp);
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'Registration successful! Please verify your email with the OTP sent to your email.',
+            requiresEmailVerification: true,
+            email: user.email,
+            userId: user._id
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Verify email with OTP
+ * @route   POST /api/auth/verify-otp
+ * @access  Public
+ */
+exports.verifyOtp = async (req, res, next) => {
+    try {
+        const { email, otp } = req.body;
+
+        // Validate input
+        if (!email || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide email and OTP'
+            });
+        }
+
+        // Verify OTP
+        const verifyResult = await otpService.verifyOTP(email, otp);
+
+        if (!verifyResult.success) {
+            return res.status(400).json({
+                success: false,
+                message: verifyResult.message
+            });
+        }
+
+        // Update user - mark email as verified
+        const user = await User.findOneAndUpdate(
+            { email },
+            { isEmailVerified: true, verified: true },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
 
         // Send welcome email
         await emailService.sendWelcomeEmail(user);
@@ -35,11 +113,66 @@ exports.register = async (req, res, next) => {
         // Generate token
         const token = user.generateAuthToken();
 
-        res.status(201).json({
+        res.status(200).json({
             success: true,
-            message: 'User registered successfully',
+            message: 'Email verified successfully!',
             token,
             user: user.getPublicProfile()
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Resend OTP
+ * @route   POST /api/auth/resend-otp
+ * @access  Public
+ */
+exports.resendOtp = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        // Validate input
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide email'
+            });
+        }
+
+        // Check if user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Check if email is already verified
+        if (user.isEmailVerified) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email is already verified'
+            });
+        }
+
+        // Generate and send OTP
+        const otpResult = await otpService.resendOTP(email);
+        if (otpResult.success) {
+            await emailService.sendOtpEmail(email, otpResult.otp);
+        } else {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to resend OTP'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'OTP resent successfully. Please check your email.',
+            expiresIn: otpResult.expiresIn
         });
     } catch (error) {
         next(error);
@@ -70,6 +203,24 @@ exports.login = async (req, res, next) => {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
+            });
+        }
+
+        // Check if user is banned
+        if (user.isBanned) {
+            return res.status(403).json({
+                success: false,
+                message: 'Your account has been banned. Please contact the administrator.'
+            });
+        }
+
+        // Check if email is verified
+        if (!user.isEmailVerified) {
+            return res.status(403).json({
+                success: false,
+                message: 'Please verify your email first',
+                requiresEmailVerification: true,
+                email: user.email
             });
         }
 
@@ -184,6 +335,51 @@ exports.changePassword = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: 'Password changed successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Delete current user
+ * @route   DELETE /api/auth/me
+ * @access  Private
+ */
+exports.deleteMe = async (req, res, next) => {
+    try {
+        const { password } = req.body;
+
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide your password to confirm deletion'
+            });
+        }
+
+        const user = await User.findById(req.user._id).select('+password');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Verify password
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: 'Incorrect password'
+            });
+        }
+
+        await user.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: 'Your account has been deleted successfully'
         });
     } catch (error) {
         next(error);

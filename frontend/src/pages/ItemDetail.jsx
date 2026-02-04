@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/helpers';
 import { getItemById } from '../services/itemService';
 import { createClaim } from '../services/claimService';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const ItemDetail = () => {
@@ -19,11 +19,7 @@ const ItemDetail = () => {
     });
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchItem();
-    }, [id]);
-
-    const fetchItem = async () => {
+    const fetchItem = useCallback(async () => {
         try {
             const data = await getItemById(id);
             setItem(data.item);
@@ -32,7 +28,11 @@ const ItemDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchItem();
+    }, [fetchItem]);
 
     const handleClaimSubmit = async (e) => {
         e.preventDefault();

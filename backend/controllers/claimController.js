@@ -62,8 +62,8 @@ exports.createClaim = async (req, res, next) => {
         // Notify item reporter and staff
         await notificationService.notifyClaim(item.reportedBy, claim, item);
 
-        // Notify staff/admin users
-        const staffUsers = await User.find({ role: { $in: ['staff', 'admin'] } });
+        // Notify admins
+        const staffUsers = await User.find({ role: 'admin' });
         for (const staff of staffUsers) {
             await notificationService.createNotification({
                 user: staff._id,
@@ -177,7 +177,7 @@ exports.getClaimById = async (req, res, next) => {
 /**
  * @desc    Update claim status (approve/reject)
  * @route   PATCH /api/claims/:id
- * @access  Private (Staff/Admin)
+ * @access  Private (Admin)
  */
 exports.updateClaimStatus = async (req, res, next) => {
     try {
@@ -326,7 +326,7 @@ exports.deleteClaim = async (req, res, next) => {
 /**
  * @desc    Get claim statistics
  * @route   GET /api/claims/stats
- * @access  Private (Staff/Admin)
+ * @access  Private (Admin)
  */
 exports.getClaimStats = async (req, res, next) => {
     try {

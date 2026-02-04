@@ -17,6 +17,11 @@ import MyClaims from './pages/MyClaims';
 import Notifications from './pages/Notifications';
 import VerifyClaims from './pages/VerifyClaims';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import AdminSettings from './pages/AdminSettings';
+import Profile from './pages/Profile';
+
+import { Toaster } from 'react-hot-toast';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -33,6 +38,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
+          <Toaster position="top-right" />
           <div className="min-h-screen bg-gray-50">
             <Navbar />
             <Routes>
@@ -44,6 +50,14 @@ function App() {
               <Route path="/items/:id" element={<ItemDetail />} />
 
               {/* Protected Routes */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/dashboard"
                 element={
@@ -87,7 +101,7 @@ function App() {
               <Route
                 path="/verify-claims"
                 element={
-                  <ProtectedRoute requiredRole="staff">
+                  <ProtectedRoute requiredRole="admin">
                     <VerifyClaims />
                   </ProtectedRoute>
                 }
@@ -97,6 +111,22 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/settings"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminSettings />
                   </ProtectedRoute>
                 }
               />

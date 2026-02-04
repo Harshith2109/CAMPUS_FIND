@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { getMyItems } from '../services/itemService';
 import { getMyClaims } from '../services/claimService';
 import { getNotifications } from '../services/notificationService';

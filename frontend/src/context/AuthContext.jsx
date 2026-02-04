@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { AuthContext } from './authContextValue';
 import { getCurrentUser, isAuthenticated, logout as authLogout } from '../services/authService';
-
-const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -9,14 +8,17 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         // Check if user is authenticated on mount
-        if (isAuthenticated()) {
-            const currentUser = getCurrentUser();
-            setUser(currentUser);
-        }
-        setLoading(false);
+        const initAuth = () => {
+            if (isAuthenticated()) {
+                const currentUser = getCurrentUser();
+                setUser(currentUser);
+            }
+            setLoading(false);
+        };
+        initAuth();
     }, []);
 
-    const login = (userData, token) => {
+    const login = (userData) => {
         setUser(userData);
     };
 
@@ -40,12 +42,4 @@ export const AuthProvider = ({ children }) => {
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
 };

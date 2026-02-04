@@ -23,7 +23,7 @@ router.get('/:id', getClaimById);
 router.delete('/:id', deleteClaim);
 
 // Staff/Admin routes
-router.patch('/:id', authorize('staff', 'admin'), updateClaimStatus);
-router.get('/admin/stats', authorize('staff', 'admin'), getClaimStats);
+router.patch('/:id', authorize('admin'), updateClaimStatus);
+router.get('/admin/stats', authorize('admin'), getClaimStats);
 
 module.exports = router;

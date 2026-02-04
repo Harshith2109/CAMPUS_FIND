@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useState, useEffect, useCallback } from 'react';
 import { getUnreadCount } from '../services/notificationService';
 
 const Navbar = () => {
@@ -8,23 +8,27 @@ const Navbar = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    useEffect(() => {
-        if (user) {
-            fetchUnreadCount();
-            // Poll for new notifications every 30 seconds
-            const interval = setInterval(fetchUnreadCount, 30000);
-            return () => clearInterval(interval);
-        }
-    }, [user]);
-
-    const fetchUnreadCount = async () => {
+    const fetchUnreadCount = useCallback(async () => {
         try {
             const data = await getUnreadCount();
             setUnreadCount(data.count);
         } catch (error) {
             console.error('Error fetching unread count:', error);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!user) return;
+
+        const startPolling = async () => {
+            await fetchUnreadCount();
+            // Poll for new notifications every 30 seconds
+            const interval = setInterval(fetchUnreadCount, 30000);
+            return () => clearInterval(interval);
+        };
+
+        startPolling();
+    }, [user, fetchUnreadCount]);
 
     return (
         <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -88,6 +92,12 @@ const Navbar = () => {
                                         <p className="text-sm font-medium text-gray-900">{user.name}</p>
                                         <p className="text-xs text-gray-500 capitalize">{user.role}</p>
                                     </div>
+                                    <Link
+                                        to="/profile"
+                                        className="btn btn-outline text-sm"
+                                    >
+                                        Profile
+                                    </Link>
                                     <button
                                         onClick={logout}
                                         className="btn btn-secondary text-sm"
@@ -156,6 +166,9 @@ const Navbar = () => {
                                         Admin
                                     </Link>
                                 )}
+                                <Link to="/profile" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                    My Profile
+                                </Link>
                                 <button
                                     onClick={logout}
                                     className="block w-full text-left text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"

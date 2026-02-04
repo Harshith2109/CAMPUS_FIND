@@ -137,7 +137,7 @@ exports.updateUserRole = async (req, res, next) => {
     try {
         const { role } = req.body;
 
-        if (!['user', 'staff', 'admin'].includes(role)) {
+        if (!['user', 'admin'].includes(role)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid role'
@@ -168,6 +168,83 @@ exports.updateUserRole = async (req, res, next) => {
             success: true,
             message: 'User role updated successfully',
             user: user.getPublicProfile()
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Create a new user (admin)
+ * @route   POST /api/admin/users
+ * @access  Private (Admin)
+ */
+exports.createUser = async (req, res, next) => {
+    try {
+        const { name, email, password, role, department, phone } = req.body;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'User with this email already exists'
+            });
+        }
+
+        // Create user (auto-verified since admin created it)
+        const user = await User.create({
+            name,
+            email,
+            password,
+            role: role || 'user',
+            department,
+            phone,
+            isEmailVerified: true,
+            verified: true
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'User created successfully',
+            user: user.getPublicProfile()
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Toggle user ban status
+ * @route   PATCH /api/admin/users/:id/ban
+ * @access  Private (Admin)
+ */
+exports.toggleUserBan = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Prevent admin from banning themselves
+        if (user._id.toString() === req.user._id.toString()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot ban your own account'
+            });
+        }
+
+        user.isBanned = !user.isBanned;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: `User ${user.isBanned ? 'banned' : 'unbanned'} successfully`,
+            isBanned: user.isBanned
         });
     } catch (error) {
         next(error);

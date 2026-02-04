@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getClaims, updateClaimStatus } from '../services/claimService';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -9,11 +9,7 @@ const VerifyClaims = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
 
-    useEffect(() => {
-        fetchClaims();
-    }, [filter]);
-
-    const fetchClaims = async () => {
+    const fetchClaims = useCallback(async () => {
         try {
             setLoading(true);
             const data = await getClaims({ status: filter });
@@ -23,7 +19,11 @@ const VerifyClaims = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filter]);
+
+    useEffect(() => {
+        fetchClaims();
+    }, [fetchClaims]);
 
     const handleUpdateStatus = async (id, status, notes = '') => {
         if (!confirm(`Are you sure you want to ${status} this claim?`)) return;

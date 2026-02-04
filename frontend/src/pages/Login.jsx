@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login as loginService } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
+import { login as loginService, resendOtp } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -12,6 +12,7 @@ const Login = () => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
     const handleChange = (e) => {
         setFormData({
@@ -32,7 +33,27 @@ const Login = () => {
                 navigate('/dashboard');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed. Please try again.');
+            if (err.response?.data?.requiresEmailVerification) {
+                setUnverifiedEmail(err.response?.data?.email);
+                setError('Please verify your email first before logging in.');
+            } else {
+                setError(err.response?.data?.message || 'Login failed. Please try again.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendVerificationEmail = async () => {
+        if (!unverifiedEmail) return;
+        setLoading(true);
+        try {
+            await resendOtp(unverifiedEmail);
+            setError('');
+            alert('Verification code sent to your email. Please check your inbox.');
+            navigate('/register');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to resend verification code.');
         } finally {
             setLoading(false);
         }
@@ -55,6 +76,15 @@ const Login = () => {
                     {error && (
                         <div className="mb-4 p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-lg text-sm">
                             {error}
+                            {unverifiedEmail && (
+                                <button
+                                    onClick={handleResendVerificationEmail}
+                                    disabled={loading}
+                                    className="block mt-2 text-primary-600 hover:text-primary-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Resend Verification Code
+                                </button>
+                            )}
                         </div>
                     )}
 
@@ -62,7 +92,7 @@ const Login = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address
+                                RVCE Email Address
                             </label>
                             <input
                                 id="email"
@@ -70,7 +100,7 @@ const Login = () => {
                                 type="email"
                                 required
                                 className="input"
-                                placeholder="you@example.com"
+                                placeholder="yourname@rvce.edu.in"
                                 value={formData.email}
                                 onChange={handleChange}
                             />
@@ -111,14 +141,7 @@ const Login = () => {
                         </p>
                     </div>
 
-                    {/* Demo Credentials */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <p className="text-xs font-semibold text-gray-700 mb-2">Demo Credentials:</p>
-                        <div className="text-xs text-gray-600 space-y-1">
-                            <p>Admin: admin@campusfind.com / admin123</p>
-                            <p>User: priya@student.com / user123</p>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>

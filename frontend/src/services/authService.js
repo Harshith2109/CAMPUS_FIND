@@ -9,6 +9,27 @@ export const register = async (userData) => {
 };
 
 /**
+ * Verify OTP during registration
+ */
+export const verifyOtp = async (email, otp) => {
+    const response = await api.post('/auth/verify-otp', { email, otp });
+    if (response.data.success && response.data.token) {
+        // Store token and user data
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+};
+
+/**
+ * Resend OTP
+ */
+export const resendOtp = async (email) => {
+    const response = await api.post('/auth/resend-otp', { email });
+    return response.data;
+};
+
+/**
  * Login user
  */
 export const login = async (credentials) => {
@@ -51,6 +72,14 @@ export const updateProfile = async (userData) => {
  */
 export const changePassword = async (passwordData) => {
     const response = await api.put('/auth/change-password', passwordData);
+    return response.data;
+};
+
+/**
+ * Delete account
+ */
+export const deleteAccount = async (password) => {
+    const response = await api.delete('/auth/me', { data: { password } });
     return response.data;
 };
 

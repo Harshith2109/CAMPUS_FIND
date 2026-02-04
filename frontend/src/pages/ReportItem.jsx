@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createItem } from '../services/itemService';
+import { getSettings } from '../services/adminService';
 
 const ReportItem = () => {
     const navigate = useNavigate();
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         type: 'lost',
         title: '',
@@ -17,6 +19,22 @@ const ReportItem = () => {
     });
     const [submitting, setSubmitting] = useState(false);
     const [previewImages, setPreviewImages] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const data = await getSettings();
+                if (data.settings && data.settings.categories) {
+                    setCategories(data.settings.categories);
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                // Fallback categories if fetch fails
+                setCategories(['Electronics', 'Wallet/Purse', 'Keys', 'ID Card', 'Other']);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -125,14 +143,9 @@ const ReportItem = () => {
                         required
                     >
                         <option value="">Select a category</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Clothing">Clothing</option>
-                        <option value="Accessories">Accessories</option>
-                        <option value="Books">Books</option>
-                        <option value="ID Cards">ID Cards</option>
-                        <option value="Keys">Keys</option>
-                        <option value="Bags">Bags</option>
-                        <option value="Other">Other</option>
+                        {categories.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
                     </select>
                 </div>
 
