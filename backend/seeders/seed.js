@@ -16,10 +16,18 @@ const users = [
         department: 'Administration'
     },
     {
+        name: 'Dr. Rajesh Gupta',
+        email: 'rajesh.gupta@rvce.edu.in',
+        password: 'staff123',
+        role: 'staff',
+        phone: '9876543211',
+        department: 'Computer Science'
+    },
+    {
         name: 'Priya Sharma',
         email: 'priya@rvce.edu.in',
         password: 'user123',
-        role: 'user',
+        role: 'student',
         phone: '9876543212',
         department: 'Computer Science'
     },
@@ -27,7 +35,7 @@ const users = [
         name: 'Rahul Kumar',
         email: 'rahul@rvce.edu.in',
         password: 'user123',
-        role: 'user',
+        role: 'student',
         phone: '9876543213',
         department: 'Electronics'
     },
@@ -35,7 +43,7 @@ const users = [
         name: 'Anita Desai',
         email: 'anita@rvce.edu.in',
         password: 'user123',
-        role: 'user',
+        role: 'student',
         phone: '9876543214',
         department: 'Mechanical'
     }
@@ -243,7 +251,7 @@ const seedClaims = async (items, users) => {
     try {
         // Create a sample claim for the wallet
         const walletItem = items.find(item => item.title === 'Black Wallet' && item.type === 'found');
-        const claimer = users.find(user => user.role === 'user');
+        const claimer = users.find(user => user.role === 'student');
 
         if (walletItem && claimer) {
             const claim = await Claim.create({
@@ -270,7 +278,7 @@ const seedClaims = async (items, users) => {
 // Seed sample notifications
 const seedNotifications = async (users, items) => {
     try {
-        const user = users.find(u => u.role === 'user');
+        const user = users.find(u => u.role === 'student');
         const item = items[0];
 
         if (user && item) {

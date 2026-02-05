@@ -12,7 +12,7 @@ const AdminUsers = () => {
         name: '',
         email: '',
         password: '',
-        role: 'user',
+        role: 'student',
         department: '',
         phone: ''
     });
@@ -44,7 +44,7 @@ const AdminUsers = () => {
             await createUser(newUser);
             toast.success('User created successfully');
             setShowAddModal(false);
-            setNewUser({ name: '', email: '', password: '', role: 'user', department: '', phone: '' });
+            setNewUser({ name: '', email: '', password: '', role: 'student', department: '', phone: '' });
             fetchUsers();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to create user');
@@ -139,7 +139,8 @@ const AdminUsers = () => {
                                         onChange={(e) => handleRoleUpdate(user._id, e.target.value)}
                                         className="text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     >
-                                        <option value="user">User</option>
+                                        <option value="student">Student</option>
+                                        <option value="staff">Staff</option>
                                         <option value="admin">Admin</option>
                                     </select>
                                 </td>
@@ -216,7 +217,8 @@ const AdminUsers = () => {
                                     value={newUser.role}
                                     onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                                 >
-                                    <option value="user">User</option>
+                                    <option value="student">Student</option>
+                                    <option value="staff">Staff</option>
                                     <option value="admin">Admin</option>
                                 </select>
                             </div>

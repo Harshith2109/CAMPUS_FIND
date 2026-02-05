@@ -1,22 +1,38 @@
 /**
- * Setup Script - Setup Admin User from Environment Variables
+ * Setup Script - Add Hardcoded Users to Database
  * 
  * Usage: node setup.js
  * 
- * This script creates or updates the admin user based on .env configuration.
- * It is best practice to run this during deployment.
+ * This script creates predefined admin and test users in the database.
+ * It will only add users if they don't already exist (checked by email).
  */
 
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
+// Hardcoded users to add
+const HARDCODED_USERS = [
+    {
+        name: 'Admin User',
+        email: 'harshithhs.sit25@rvce.edu.in',
+        password: 'admin123',
+        role: 'admin',
+        phone: '9876543210',
+        department: 'Administration'
+    },
+    
+];
+
 /**
  * Connect to MongoDB
  */
 async function connectDB() {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
         console.log('✅ MongoDB Connected');
         return true;
     } catch (error) {
@@ -26,73 +42,49 @@ async function connectDB() {
 }
 
 /**
- * Setup Admin User
+ * Add hardcoded users to database
  */
-async function setupAdmin() {
+async function setupUsers() {
     try {
-        let admins = [];
+        console.log('\n🔧 Setting up hardcoded users...\n');
 
-        // Check for admins configuration
-        if (process.env.ADMIN_ACCOUNTS) {
-            try {
-                admins = JSON.parse(process.env.ADMIN_ACCOUNTS);
-            } catch (e) {
-                console.error('❌ Error parsing ADMIN_ACCOUNTS environment variable. It must be a valid JSON string.');
-                return false;
-            }
-        }
+        let addedCount = 0;
+        let skippedCount = 0;
 
-        if (admins.length === 0) {
-            console.error('❌ Error: No admin configuration found. Set ADMIN_ACCOUNTS in .env as a JSON array.');
-            return false;
-        }
+        for (const userData of HARDCODED_USERS) {
+            // Check if user already exists
+            const existingUser = await User.findOne({ email: userData.email });
 
-        console.log('\n🔧 Setting up Admin users from environment variables...\n');
-
-        for (const adminConfig of admins) {
-            const { email, password } = adminConfig;
-
-            if (!email || !password) {
-                console.warn(`⚠️ Skipping invalid admin config: ${JSON.stringify(adminConfig)}`);
+            if (existingUser) {
+                console.log(`⏭️  Skipped: ${userData.email} (already exists)`);
+                skippedCount++;
                 continue;
             }
 
-            // Check if user already exists
-            const existingUser = await User.findOne({ email: email });
-
-            if (existingUser) {
-                // Update existing admin
-                existingUser.role = 'admin';
-                existingUser.isEmailVerified = true;
-                existingUser.verified = true;
-
-                // Update password if provided
-                existingUser.password = password;
-
-                await existingUser.save();
-                console.log(`🔄 Updated Admin: ${email}`);
-            } else {
-                // Create new admin
-                const user = new User({
-                    name: 'System Admin',
-                    email: email,
-                    password: password,
-                    role: 'admin',
-                    department: 'Administration',
-                    phone: '',
-                    isEmailVerified: true,
-                    verified: true
-                });
-
-                await user.save();
-                console.log(`✅ Created Admin: ${email}`);
-            }
+            // Create new user
+            const user = new User(userData);
+            await user.save();
+            console.log(`✅ Added: ${userData.name} (${userData.email}) - Role: ${userData.role}`);
+            addedCount++;
         }
 
-        console.log(`\n✨ Admin Setup Complete! Processed ${admins.length} admin(s).`);
+        console.log(`\n✨ Setup Complete!`);
+        console.log(`   Added: ${addedCount} new users`);
+        console.log(`   Skipped: ${skippedCount} existing users\n`);
+
+        // Display all available credentials
+        console.log('📝 Available Login Credentials:');
+        console.log('━'.repeat(60));
+        for (const user of HARDCODED_USERS) {
+            console.log(`Email: ${user.email}`);
+            console.log(`Password: ${user.password}`);
+            console.log(`Role: ${user.role.toUpperCase()}`);
+            console.log('─'.repeat(60));
+        }
+
         return true;
     } catch (error) {
-        console.error('❌ Error setting up admin:', error.message);
+        console.error('❌ Error setting up users:', error.message);
         return false;
     }
 }
@@ -102,17 +94,18 @@ async function setupAdmin() {
  */
 async function main() {
     console.log('\n╔════════════════════════════════════════════════════════════╗');
-    console.log('║          CampusFind - Admin Setup Script                   ║');
+    console.log('║          CampusFind - User Setup Script                    ║');
     console.log('╚════════════════════════════════════════════════════════════╝');
 
     // Connect to database
     const connected = await connectDB();
     if (!connected) {
+        console.error('\n❌ Failed to connect to database. Make sure MongoDB is running.');
         process.exit(1);
     }
 
-    // Run setup
-    const success = await setupAdmin();
+    // Add users
+    const success = await setupUsers();
 
     // Disconnect
     await mongoose.disconnect();

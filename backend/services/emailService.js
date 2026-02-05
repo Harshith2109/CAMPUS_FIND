@@ -4,43 +4,43 @@ const nodemailer = require('nodemailer');
  * Create email transporter
  */
 const createTransporter = () => {
-    return nodemailer.createTransport({
-        service: process.env.EMAIL_SERVICE || 'gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD
-        }
-    });
+  return nodemailer.createTransport({
+    service: process.env.EMAIL_SERVICE || 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
 };
 
 /**
  * Send email notification
  */
 exports.sendEmail = async ({ to, subject, html }) => {
-    try {
-        const transporter = createTransporter();
+  try {
+    const transporter = createTransporter();
 
-        const mailOptions = {
-            from: process.env.EMAIL_FROM,
-            to,
-            subject,
-            html
-        };
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to,
+      subject,
+      html
+    };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log('✅ Email sent:', info.messageId);
-        return { success: true, messageId: info.messageId };
-    } catch (error) {
-        console.error('❌ Email sending failed:', error.message);
-        return { success: false, error: error.message };
-    }
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Email sending failed:', error.message);
+    return { success: false, error: error.message };
+  }
 };
 
 /**
  * Send welcome email
  */
 exports.sendWelcomeEmail = async (user) => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #3b82f6;">Welcome to CampusFind! 🎉</h2>
       <p>Hi ${user.name},</p>
@@ -58,21 +58,21 @@ exports.sendWelcomeEmail = async (user) => {
     </div>
   `;
 
-    return await this.sendEmail({
-        to: user.email,
-        subject: 'Welcome to CampusFind!',
-        html
-    });
+  return await this.sendEmail({
+    to: user.email,
+    subject: 'Welcome to CampusFind!',
+    html
+  });
 };
 
 /**
  * Send item match notification
  */
 exports.sendMatchNotification = async (user, item, matchedItem) => {
-    const itemType = item.type === 'lost' ? 'lost' : 'found';
-    const matchType = matchedItem.type === 'lost' ? 'lost' : 'found';
+  const itemType = item.type === 'lost' ? 'lost' : 'found';
+  const matchType = matchedItem.type === 'lost' ? 'lost' : 'found';
 
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #10b981;">Great News! We Found a Match! 🎯</h2>
       <p>Hi ${user.name},</p>
@@ -90,18 +90,18 @@ exports.sendMatchNotification = async (user, item, matchedItem) => {
     </div>
   `;
 
-    return await this.sendEmail({
-        to: user.email,
-        subject: 'CampusFind: Potential Match Found!',
-        html
-    });
+  return await this.sendEmail({
+    to: user.email,
+    subject: 'CampusFind: Potential Match Found!',
+    html
+  });
 };
 
 /**
  * Send claim notification
  */
 exports.sendClaimNotification = async (user, claim, item) => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #f59e0b;">New Claim Request 📋</h2>
       <p>Hi ${user.name},</p>
@@ -116,21 +116,21 @@ exports.sendClaimNotification = async (user, claim, item) => {
     </div>
   `;
 
-    return await this.sendEmail({
-        to: user.email,
-        subject: 'CampusFind: New Claim Request',
-        html
-    });
+  return await this.sendEmail({
+    to: user.email,
+    subject: 'CampusFind: New Claim Request',
+    html
+  });
 };
 
 /**
  * Send claim status update
  */
 exports.sendClaimStatusUpdate = async (user, claim, item, status) => {
-    const statusText = status === 'approved' ? 'Approved ✅' : 'Rejected ❌';
-    const statusColor = status === 'approved' ? '#10b981' : '#ef4444';
+  const statusText = status === 'approved' ? 'Approved ✅' : 'Rejected ❌';
+  const statusColor = status === 'approved' ? '#10b981' : '#ef4444';
 
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: ${statusColor};">Claim ${statusText}</h2>
       <p>Hi ${user.name},</p>
@@ -142,24 +142,24 @@ exports.sendClaimStatusUpdate = async (user, claim, item, status) => {
         ${claim.verificationNotes ? `<p><strong>Notes:</strong> ${claim.verificationNotes}</p>` : ''}
       </div>
       ${status === 'approved' ?
-            '<p>Congratulations! You can now coordinate with the finder to retrieve your item.</p>' :
-            '<p>If you believe this is an error, please contact support.</p>'
-        }
+      '<p>Congratulations! You can now coordinate with the finder to retrieve your item.</p>' :
+      '<p>If you believe this is an error, please contact support.</p>'
+    }
       <p style="margin-top: 30px;">Best regards,<br>The CampusFind Team</p>
     </div>
   `;
 
-    return await this.sendEmail({
-        to: user.email,
-        subject: `CampusFind: Claim ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-        html
-    });
+  return await this.sendEmail({
+    to: user.email,
+    subject: `CampusFind: Claim ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+    html
+  });
 };
 /**
  * Send OTP email for email verification
  */
 exports.sendOtpEmail = async (email, otp) => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #3b82f6;">Email Verification Required 🔐</h2>
       <p>Hi,</p>
@@ -175,9 +175,36 @@ exports.sendOtpEmail = async (email, otp) => {
     </div>
   `;
 
-    return await this.sendEmail({
-        to: email,
-        subject: 'CampusFind Email Verification - OTP',
-        html
-    });
+  return await this.sendEmail({
+    to: email,
+    subject: 'CampusFind Email Verification - OTP',
+    html
+  });
+};
+
+/**
+ * Send password reset OTP email
+ */
+exports.sendPasswordResetEmail = async (email, otp) => {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #f59e0b;">Password Reset Request 🔑</h2>
+      <p>Hi,</p>
+      <p>You have requested to reset your password for your CampusFind account. To proceed with resetting your password, please use the OTP below.</p>
+      <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center;">
+        <p style="color: #6b7280; margin-bottom: 10px;">Your Password Reset OTP:</p>
+        <p style="font-size: 32px; font-weight: bold; color: #f59e0b; letter-spacing: 5px; margin: 0;">${otp}</p>
+        <p style="color: #9ca3af; margin-top: 10px; font-size: 12px;">This OTP will expire in 10 minutes</p>
+      </div>
+      <p><strong>Security Notice:</strong> Do not share this OTP with anyone. CampusFind staff will never ask for your OTP.</p>
+      <p style="margin-top: 30px;">If you did not request a password reset, please ignore this email and your password will remain unchanged.</p>
+      <p style="margin-top: 30px;">Best regards,<br>The CampusFind Team</p>
+    </div>
+  `;
+
+  return await this.sendEmail({
+    to: email,
+    subject: 'CampusFind Password Reset - OTP',
+    html
+  });
 };

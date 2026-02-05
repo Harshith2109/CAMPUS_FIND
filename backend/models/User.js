@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 /**
  * User Schema
- * Represents students/users and administrators
+ * Represents students, staff members, and administrators
  */
 const userSchema = new mongoose.Schema({
     name: {
@@ -32,8 +32,8 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user'
+        enum: ['student', 'staff', 'admin'],
+        default: 'student'
     },
     phone: {
         type: String,

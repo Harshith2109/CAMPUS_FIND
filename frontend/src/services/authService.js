@@ -84,6 +84,31 @@ export const deleteAccount = async (password) => {
 };
 
 /**
+ * Request password reset (send OTP)
+ */
+export const forgotPassword = async (email) => {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+};
+
+/**
+ * Verify OTP for password reset
+ */
+export const verifyResetOtp = async (email, otp) => {
+    const response = await api.post('/auth/verify-reset-otp', { email, otp });
+    return response.data;
+};
+
+/**
+ * Reset password
+ */
+export const resetPassword = async (email, newPassword) => {
+    const response = await api.post('/auth/reset-password', { email, newPassword });
+    return response.data;
+};
+
+
+/**
  * Get current user from localStorage
  */
 export const getCurrentUser = () => {

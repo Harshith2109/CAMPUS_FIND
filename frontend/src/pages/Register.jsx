@@ -28,7 +28,8 @@ const Register = () => {
         password: '',
         confirmPassword: '',
         phone: '',
-        department: ''
+        department: '',
+        role: 'student'
     });
     const [otp, setOtp] = useState('');
     const [error, setError] = useState('');
@@ -310,6 +311,25 @@ const Register = () => {
                                     </option>
                                 ))}
                             </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+                                User Type *
+                            </label>
+                            <select
+                                id="role"
+                                name="role"
+                                className="input"
+                                value={formData.role}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="student">Student</option>
+                                <option value="staff">Staff</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">Select your role at RVCE</p>
                         </div>
 
                         <div>

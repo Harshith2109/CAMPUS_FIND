@@ -158,6 +158,11 @@ const Navbar = () => {
                                 <Link to="/my-claims" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
                                     My Claims
                                 </Link>
+                                {(user.role === 'staff' || user.role === 'admin') && (
+                                    <Link to="/verify-claims" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                        Verify Claims
+                                    </Link>
+                                )}
                                 <Link to="/notifications" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
                                     Notifications {unreadCount > 0 && `(${unreadCount})`}
                                 </Link>

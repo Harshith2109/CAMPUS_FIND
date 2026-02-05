@@ -16,8 +16,14 @@ const ProtectedRoute = ({ children, requiredRole }) => {
         return <Navigate to="/login" replace />;
     }
 
-    if (requiredRole && user.role !== requiredRole && !['admin'].includes(user.role)) {
-        return <Navigate to="/dashboard" replace />;
+    // If requiredRole is specified, check if user has permission
+    if (requiredRole) {
+        const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+
+        // Admin always has access, otherwise check if user role is in allowed roles
+        if (user.role !== 'admin' && !allowedRoles.includes(user.role)) {
+            return <Navigate to="/dashboard" replace />;
+        }
     }
 
     return children;

@@ -108,7 +108,7 @@ const Login = () => {
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                Password
+                                Password *
                             </label>
                             <input
                                 id="password"
@@ -120,6 +120,11 @@ const Login = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                             />
+                            <div className="text-right mt-2">
+                                <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                                    Forgot Password?
+                                </Link>
+                            </div>
                         </div>
 
                         <button

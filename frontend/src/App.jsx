@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import ItemList from './pages/ItemList';
 import ItemDetail from './pages/ItemDetail';
@@ -46,6 +47,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/items" element={<ItemList />} />
               <Route path="/items/:id" element={<ItemDetail />} />
 
@@ -101,7 +103,7 @@ function App() {
               <Route
                 path="/verify-claims"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute requiredRole={['staff', 'admin']}>
                     <VerifyClaims />
                   </ProtectedRoute>
                 }
