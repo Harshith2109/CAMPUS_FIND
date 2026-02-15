@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getMyItems, deleteItem } from '../services/itemService';
 import ItemCard from '../components/ItemCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+import toast from '../utils/toast';
 
 const MyItems = () => {
     const [items, setItems] = useState([]);
@@ -18,7 +19,7 @@ const MyItems = () => {
             const data = await getMyItems();
             setItems(data.items || []);
         } catch (error) {
-            console.error('Error fetching items:', error);
+            toast.error(error, 'Failed to load your items');
         } finally {
             setLoading(false);
         }
@@ -30,10 +31,9 @@ const MyItems = () => {
         try {
             await deleteItem(id);
             setItems(items.filter(item => item._id !== id));
-            alert('Item deleted successfully');
+            toast.success('Item deleted successfully');
         } catch (error) {
-            console.error('Error deleting item:', error);
-            alert('Failed to delete item');
+            toast.error(error, 'Failed to delete item');
         }
     };
 
@@ -62,8 +62,8 @@ const MyItems = () => {
                 <button
                     onClick={() => setFilter('all')}
                     className={`px-4 py-2 font-medium transition-colors ${filter === 'all'
-                            ? 'text-primary-600 border-b-2 border-primary-600'
-                            : 'text-gray-600 hover:text-gray-900'
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     All ({items.length})
@@ -71,8 +71,8 @@ const MyItems = () => {
                 <button
                     onClick={() => setFilter('active')}
                     className={`px-4 py-2 font-medium transition-colors ${filter === 'active'
-                            ? 'text-primary-600 border-b-2 border-primary-600'
-                            : 'text-gray-600 hover:text-gray-900'
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     Active ({items.filter(i => i.status === 'active').length})
@@ -80,8 +80,8 @@ const MyItems = () => {
                 <button
                     onClick={() => setFilter('claimed')}
                     className={`px-4 py-2 font-medium transition-colors ${filter === 'claimed'
-                            ? 'text-primary-600 border-b-2 border-primary-600'
-                            : 'text-gray-600 hover:text-gray-900'
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     Claimed ({items.filter(i => i.status === 'claimed').length})
@@ -89,8 +89,8 @@ const MyItems = () => {
                 <button
                     onClick={() => setFilter('resolved')}
                     className={`px-4 py-2 font-medium transition-colors ${filter === 'resolved'
-                            ? 'text-primary-600 border-b-2 border-primary-600'
-                            : 'text-gray-600 hover:text-gray-900'
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     Resolved ({items.filter(i => i.status === 'resolved').length})

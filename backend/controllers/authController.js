@@ -2,6 +2,8 @@ const User = require('../models/User');
 const TemporaryUser = require('../models/TemporaryUser');
 const emailService = require('../services/emailService');
 const otpService = require('../services/otpService');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * @desc    Register a new user
@@ -29,8 +31,8 @@ exports.register = async (req, res, next) => {
             });
         }
 
-        // Check if user already exists in main User collection
-        const existingUser = await User.findOne({ email });
+        // Check if user already exists in main User collection (explicit lowercase)
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             return res.status(400).json({
                 success: false,
@@ -38,8 +40,8 @@ exports.register = async (req, res, next) => {
             });
         }
 
-        // Remove any existing temporary user with same email
-        await TemporaryUser.deleteOne({ email });
+        // Remove any existing temporary user with same email (explicit lowercase)
+        await TemporaryUser.deleteOne({ email: email.toLowerCase() });
 
         // Create temporary user
         // Note: Password hashing is handled in the TemporaryUser model pre-save hook
@@ -99,17 +101,18 @@ exports.verifyOtp = async (req, res, next) => {
         // Check if this is an existing user verifying (unlikely with new flow but good for robustness)
         // or a new user registration from TemporaryUser
 
-        // 1. Check TemporaryUser first
-        const tempUser = await TemporaryUser.findOne({ email });
+        // 1. Check TemporaryUser first (explicit lowercase)
+        const tempUser = await TemporaryUser.findOne({ email: email.toLowerCase() });
 
         let user;
 
         if (tempUser) {
             // Move from TemporaryUser to User
+            // The User model's pre-save hook will hash the password now
             user = await User.create({
                 name: tempUser.name,
                 email: tempUser.email,
-                password: tempUser.password, // Already hashed in TemporaryUser
+                password: tempUser.password, // Plain text from TemporaryUser
                 phone: tempUser.phone,
                 department: tempUser.department,
                 role: tempUser.role,
@@ -121,7 +124,7 @@ exports.verifyOtp = async (req, res, next) => {
             await TemporaryUser.deleteOne({ _id: tempUser._id });
         } else {
             // 2. Check existing User (legacy flow or re-verification if implemented)
-            user = await User.findOne({ email });
+            user = await User.findOne({ email: email.toLowerCase() });
 
             if (!user) {
                 return res.status(404).json({
@@ -244,13 +247,13 @@ exports.login = async (req, res, next) => {
             });
         }
 
-        // Find user and include password
-        const user = await User.findOne({ email }).select('+password');
+        // Find user and include password (ensure lowercase email for lookup)
+        const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
 
         if (!user) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid credentials'
+                message: 'User not found'
             });
         }
 
@@ -278,7 +281,7 @@ exports.login = async (req, res, next) => {
         if (!isPasswordMatch) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid credentials'
+                message: 'Incorrect password'
             });
         }
 
@@ -390,22 +393,24 @@ exports.changePassword = async (req, res, next) => {
 };
 
 /**
- * @desc    Delete current user
- * @route   DELETE /api/auth/me
+ * @desc    Initiate account deletion (send OTP to email)
+ * @route   POST /api/auth/initiate-account-deletion
  * @access  Private
  */
-exports.deleteMe = async (req, res, next) => {
+exports.initiateAccountDeletion = async (req, res, next) => {
     try {
         const { password } = req.body;
 
         if (!password) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide your password to confirm deletion'
+                message: 'Please provide your password to initiate deletion'
             });
         }
 
-        const user = await User.findById(req.user._id).select('+password');
+        // Use lowercase email for consistent OTP lookup across casing
+        const lowerEmail = req.user.email.toLowerCase();
+        const user = await User.findById(req.user._id).select('+password email');
 
         if (!user) {
             return res.status(404).json({
@@ -423,7 +428,77 @@ exports.deleteMe = async (req, res, next) => {
             });
         }
 
-        await user.deleteOne();
+        // Generate and send OTP
+        const otpResult = await otpService.createOTP(lowerEmail);
+        if (!otpResult.success) {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to generate verification code. Please try again later.'
+            });
+        }
+
+        const emailResult = await emailService.sendAccountDeletionOtp(lowerEmail, otpResult.otp);
+        if (!emailResult.success) {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to send verification code. Please try again later.'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Verification code sent to your email. Please verify to complete account deletion.'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Delete current user
+ * @route   DELETE /api/auth/me
+ * @access  Private
+ */
+exports.deleteMe = async (req, res, next) => {
+    try {
+        const { password, otp } = req.body;
+
+        if (!password || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide both your password and verification code'
+            });
+        }
+
+        const user = await User.findById(req.user._id).select('+password email');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Verify password again for safety
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: 'Incorrect password'
+            });
+        }
+
+        // Verify OTP
+        const verifyResult = await otpService.verifyOTP(user.email.toLowerCase(), otp);
+        if (!verifyResult.success) {
+            return res.status(400).json({
+                success: false,
+                message: verifyResult.message
+            });
+        }
+
+        // Use more direct deletion method to ensure it persists in all environments
+        await User.findByIdAndDelete(user._id);
 
         res.status(200).json({
             success: true,
@@ -548,8 +623,9 @@ exports.resetPassword = async (req, res, next) => {
             });
         }
 
+        const lowerEmail = email.toLowerCase();
         // Find user
-        const user = await User.findOne({ email: email.toLowerCase() });
+        const user = await User.findOne({ email: lowerEmail });
 
         if (!user) {
             return res.status(404).json({
@@ -565,6 +641,156 @@ exports.resetPassword = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: 'Password reset successfully. You can now login with your new password.'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Update profile picture
+ * @route   PUT /api/auth/profile/picture
+ * @access  Private
+ */
+exports.updateProfilePicture = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload a file'
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+
+        // Delete old picture if exists
+        if (user.profilePicture) {
+            const oldPath = path.join(__dirname, '..', user.profilePicture);
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath);
+            }
+        }
+
+        user.profilePicture = `uploads/${req.file.filename}`;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile picture updated successfully',
+            profilePicture: user.profilePicture
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Remove profile picture
+ * @route   DELETE /api/auth/profile/picture
+ * @access  Private
+ */
+exports.removeProfilePicture = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user.profilePicture) {
+            return res.status(400).json({
+                success: false,
+                message: 'No profile picture to remove'
+            });
+        }
+
+        const filePath = path.join(__dirname, '..', user.profilePicture);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+
+        user.profilePicture = null;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile picture removed successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Initiate email change (send OTP to new email)
+ * @route   POST /api/auth/initiate-email-change
+ * @access  Private
+ */
+exports.initiateEmailChange = async (req, res, next) => {
+    try {
+        const { newEmail } = req.body;
+
+        if (!newEmail || !newEmail.endsWith('@rvce.edu.in')) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a valid RVCE email address'
+            });
+        }
+
+        // Check if new email is already taken
+        const existingUser = await User.findOne({ email: newEmail });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email address is already in use by another account'
+            });
+        }
+
+        // Generate and send OTP to NEW email
+        const otpResult = await otpService.createOTP(newEmail);
+        if (otpResult.success) {
+            await emailService.sendEmailChangeOtp(newEmail, otpResult.otp);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Verification code sent to your new email address. Please verify to complete the change.',
+            newEmail
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Verify and complete email change
+ * @route   PUT /api/auth/verify-email-change
+ * @access  Private
+ */
+exports.verifyEmailChange = async (req, res, next) => {
+    try {
+        const { newEmail, otp } = req.body;
+
+        if (!newEmail || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide the new email and verification code'
+            });
+        }
+
+        // Verify OTP
+        const verifyResult = await otpService.verifyOTP(newEmail, otp);
+        if (!verifyResult.success) {
+            return res.status(400).json({
+                success: false,
+                message: verifyResult.message
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+        user.email = newEmail;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Email address updated successfully',
+            user: user.getPublicProfile()
         });
     } catch (error) {
         next(error);

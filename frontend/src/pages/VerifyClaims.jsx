@@ -1,13 +1,17 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getClaims, updateClaimStatus } from '../services/claimService';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ImageModal from '../components/ImageModal';
+import toast from '../utils/toast';
+import { getImageUrl } from '../utils/helpers';
 
 const VerifyClaims = () => {
     const [claims, setClaims] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
+    const [modalInfo, setModalInfo] = useState({ isOpen: false, index: 0, images: [] });
+
 
     const fetchClaims = useCallback(async () => {
         try {
@@ -15,7 +19,7 @@ const VerifyClaims = () => {
             const data = await getClaims({ status: filter });
             setClaims(data.claims || []);
         } catch (error) {
-            console.error('Error fetching claims:', error);
+            toast.error(error, 'Failed to fetch claims for verification');
         } finally {
             setLoading(false);
         }
@@ -31,10 +35,9 @@ const VerifyClaims = () => {
         try {
             await updateClaimStatus(id, { status, verificationNotes: notes });
             setClaims(claims.filter(claim => claim._id !== id));
-            alert(`Claim ${status} successfully`);
+            toast.success(`Claim ${status} successfully`);
         } catch (error) {
-            console.error('Error updating claim:', error);
-            alert('Failed to update claim');
+            toast.error(error, 'Failed to update claim');
         }
     };
 
@@ -65,8 +68,8 @@ const VerifyClaims = () => {
                     <button
                         onClick={() => setFilter('pending')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'pending'
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white text-gray-600 hover:bg-gray-50'
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                     >
                         Pending
@@ -74,8 +77,8 @@ const VerifyClaims = () => {
                     <button
                         onClick={() => setFilter('approved')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'approved'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-white text-gray-600 hover:bg-gray-50'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                     >
                         Approved
@@ -83,8 +86,8 @@ const VerifyClaims = () => {
                     <button
                         onClick={() => setFilter('rejected')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'rejected'
-                                ? 'bg-red-600 text-white'
-                                : 'bg-white text-gray-600 hover:bg-gray-50'
+                            ? 'bg-red-600 text-white'
+                            : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                     >
                         Rejected
@@ -99,19 +102,22 @@ const VerifyClaims = () => {
                             <div className="flex flex-col md:flex-row gap-6">
                                 {/* Item Image */}
                                 <div className="flex-shrink-0">
-                                    {claim.item?.images?.[0] ? (
+                                    <div className="relative group cursor-pointer" onClick={() => setModalInfo({
+                                        isOpen: true,
+                                        index: 0,
+                                        images: (claim.item?.images?.length > 0 ? claim.item.images : [null]).map(img => getImageUrl(img))
+                                    })}>
                                         <img
-                                            src={claim.item.images[0]}
-                                            alt={claim.item.name}
-                                            className="w-full md:w-64 h-64 object-cover rounded-lg"
+                                            src={getImageUrl(claim.item?.images?.[0])}
+                                            alt={claim.item?.name}
+                                            className="w-full md:w-64 h-64 object-cover rounded-lg group-hover:opacity-95 transition-opacity"
                                         />
-                                    ) : (
-                                        <div className="w-full md:w-64 h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-10 rounded-lg">
+                                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                             </svg>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
 
                                 {/* Claim Details */}
@@ -121,9 +127,16 @@ const VerifyClaims = () => {
                                             <h3 className="text-xl font-bold text-gray-900">
                                                 Claim for: {claim.item?.name || 'Unknown Item'}
                                             </h3>
-                                            <p className="text-sm text-gray-600">
-                                                By: {claim.user?.name} ({claim.user?.email})
-                                            </p>
+                                            <div className="flex items-center mt-1">
+                                                <img
+                                                    src={getImageUrl(claim.user?.profilePicture)}
+                                                    alt={claim.user?.name}
+                                                    className="w-8 h-8 rounded-full border border-gray-100 mr-2 bg-gray-50 object-cover"
+                                                />
+                                                <p className="text-sm text-gray-600">
+                                                    By: <span className="font-medium text-gray-900">{claim.user?.name}</span> ({claim.user?.email})
+                                                </p>
+                                            </div>
                                             <p className="text-sm text-gray-500">
                                                 Submitted on {new Date(claim.createdAt).toLocaleDateString()}
                                             </p>
@@ -150,9 +163,13 @@ const VerifyClaims = () => {
                                             {claim.proofImages?.length > 0 && (
                                                 <div className="flex gap-2 overflow-x-auto py-2">
                                                     {claim.proofImages.map((img, idx) => (
-                                                        <a key={idx} href={img} target="_blank" rel="noopener noreferrer">
-                                                            <img src={img} alt={`Proof ${idx + 1}`} className="w-20 h-20 object-cover rounded border border-gray-200 hover:border-indigo-500" />
-                                                        </a>
+                                                        <div key={idx} className="cursor-pointer" onClick={() => setModalInfo({
+                                                            isOpen: true,
+                                                            index: idx,
+                                                            images: claim.proofImages.map(i => getImageUrl(i))
+                                                        })}>
+                                                            <img src={getImageUrl(img)} alt={`Proof ${idx + 1}`} className="w-20 h-20 object-cover rounded border border-gray-200 hover:border-indigo-500" />
+                                                        </div>
                                                     ))}
                                                 </div>
                                             )}
@@ -188,7 +205,15 @@ const VerifyClaims = () => {
                     <p className="text-gray-500 text-lg">No {filter} claims found</p>
                 </div>
             )}
+
+            <ImageModal
+                isOpen={modalInfo.isOpen}
+                onClose={() => setModalInfo(prev => ({ ...prev, isOpen: false }))}
+                images={modalInfo.images}
+                initialIndex={modalInfo.index}
+            />
         </div>
+
     );
 };
 

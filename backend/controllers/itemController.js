@@ -43,7 +43,7 @@ exports.createItem = async (req, res, next) => {
         await matchingService.updateMatches(item);
 
         // Populate reporter info
-        await item.populate('reportedBy', 'name email phone department');
+        await item.populate('reportedBy', 'name email phone department profilePicture');
 
         res.status(201).json({
             success: true,
@@ -89,9 +89,17 @@ exports.getItems = async (req, res, next) => {
             if (dateTo) query.date.$lte = new Date(dateTo);
         }
 
-        // Text search
+        // Text search (partial matching)
         if (search) {
-            query.$text = { $search: search };
+            const searchRegex = new RegExp(search, 'i');
+            query.$or = [
+                { title: searchRegex },
+                { description: searchRegex },
+                { location: searchRegex },
+                { color: searchRegex },
+                { brand: searchRegex },
+                { identifyingFeatures: searchRegex }
+            ];
         }
 
         // Pagination
@@ -99,7 +107,7 @@ exports.getItems = async (req, res, next) => {
 
         // Execute query
         const items = await Item.find(query)
-            .populate('reportedBy', 'name email department')
+            .populate('reportedBy', 'name email department profilePicture')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(parseInt(limit));
@@ -128,7 +136,7 @@ exports.getItems = async (req, res, next) => {
 exports.getItemById = async (req, res, next) => {
     try {
         const item = await Item.findById(req.params.id)
-            .populate('reportedBy', 'name email phone department')
+            .populate('reportedBy', 'name email phone department profilePicture')
             .populate('matchedItems', 'title type category location date images')
             .populate({
                 path: 'claimRequests',
@@ -207,7 +215,7 @@ exports.updateItem = async (req, res, next) => {
             await matchingService.updateMatches(item);
         }
 
-        await item.populate('reportedBy', 'name email phone department');
+        await item.populate('reportedBy', 'name email phone department profilePicture');
 
         res.status(200).json({
             success: true,
@@ -262,6 +270,7 @@ exports.deleteItem = async (req, res, next) => {
 exports.getMyItems = async (req, res, next) => {
     try {
         const items = await Item.find({ reportedBy: req.user._id })
+            .populate('reportedBy', 'name email department profilePicture')
             .populate('matchedItems', 'title type category location date')
             .sort({ createdAt: -1 });
 

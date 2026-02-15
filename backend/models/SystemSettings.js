@@ -28,8 +28,17 @@ const systemSettingsSchema = new mongoose.Schema({
     maintenanceMode: {
         type: Boolean,
         default: false
+    },
+    maxImagesPerItem: {
+        type: Number,
+        default: 5
+    },
+    maxImageSize: {
+        type: Number,
+        default: 1 // value in MB
     }
 }, {
+
     timestamps: true
 });
 

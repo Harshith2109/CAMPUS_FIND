@@ -5,6 +5,8 @@ import {
     verifyResetOtp as verifyResetOtpService,
     resetPassword as resetPasswordService
 } from '../services/authService';
+import PasswordField from '../components/PasswordField';
+import toast from '../utils/toast';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
@@ -50,7 +52,7 @@ const ForgotPassword = () => {
                 }, 1000);
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to send reset code. Please try again.');
+            toast.error(err, 'Failed to send reset code. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -75,7 +77,7 @@ const ForgotPassword = () => {
                 setStep('reset-password');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'OTP verification failed. Please try again.');
+            toast.error(err, 'OTP verification failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -105,14 +107,11 @@ const ForgotPassword = () => {
 
             if (data.success) {
                 // Show success and redirect to login
-                navigate('/login', {
-                    state: {
-                        message: 'Password reset successfully! You can now login with your new password.'
-                    }
-                });
+                toast.success('Password reset successfully! You can now login with your new password.');
+                navigate('/login');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Password reset failed. Please try again.');
+            toast.error(err, 'Password reset failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -141,7 +140,7 @@ const ForgotPassword = () => {
                 }, 1000);
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+            toast.error(err, 'Failed to resend OTP. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -264,37 +263,25 @@ const ForgotPassword = () => {
                     {/* Step 3: Reset Password */}
                     {step === 'reset-password' && (
                         <form onSubmit={handleResetPassword} className="space-y-6">
-                            <div>
-                                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                                    New Password *
-                                </label>
-                                <input
-                                    id="newPassword"
-                                    name="newPassword"
-                                    type="password"
-                                    required
-                                    className="input"
-                                    placeholder="••••••••"
-                                    value={formData.newPassword}
-                                    onChange={handleChange}
-                                />
-                            </div>
+                            <PasswordField
+                                id="newPassword"
+                                name="newPassword"
+                                label="New Password *"
+                                required
+                                value={formData.newPassword}
+                                onChange={handleChange}
+                                autoComplete="new-password"
+                            />
 
-                            <div>
-                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Confirm New Password *
-                                </label>
-                                <input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type="password"
-                                    required
-                                    className="input"
-                                    placeholder="••••••••"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                />
-                            </div>
+                            <PasswordField
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                label="Confirm New Password *"
+                                required
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                autoComplete="new-password"
+                            />
 
                             <button
                                 type="submit"

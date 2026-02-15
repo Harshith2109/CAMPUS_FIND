@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSettings, updateSettings } from '../services/adminService';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { toast } from 'react-hot-toast';
+import toast from '../utils/toast';
 
 const AdminSettings = () => {
     const [settings, setSettings] = useState(null);
@@ -18,8 +18,7 @@ const AdminSettings = () => {
             const data = await getSettings();
             setSettings(data.settings);
         } catch (error) {
-            console.error('Error fetching settings:', error);
-            toast.error('Failed to load settings');
+            toast.error(error, 'Failed to load settings');
         } finally {
             setLoading(false);
         }
@@ -55,8 +54,7 @@ const AdminSettings = () => {
             setSettings(data.settings);
             toast.success('Settings updated successfully');
         } catch (error) {
-            console.error('Error updating settings:', error);
-            toast.error('Failed to update settings');
+            toast.error(error, 'Failed to update settings');
         } finally {
             setSaving(false);
         }
@@ -149,8 +147,48 @@ const AdminSettings = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* File Management Settings */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">File Management</h2>
+                    <p className="text-gray-600 mb-4 text-sm">Configure upload limits for images.</p>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Maximum Images per Item
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                max="20"
+                                value={settings?.maxImagesPerItem || 5}
+                                onChange={(e) => updateSystemSettings({ maxImagesPerItem: parseInt(e.target.value) })}
+                                className="input"
+                                disabled={saving}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Maximum Image Size (MB)
+                            </label>
+                            <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                max="10"
+                                value={settings?.maxImageSize || 1}
+                                onChange={(e) => updateSystemSettings({ maxImageSize: parseFloat(e.target.value) })}
+                                className="input"
+                                disabled={saving}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
     );
 };
 

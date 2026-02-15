@@ -5,6 +5,7 @@ import ItemCard from '../components/ItemCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const ItemList = () => {
+    const [searchTerm, setSearchTerm] = useState('');
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -14,6 +15,15 @@ const ItemList = () => {
         status: '',
         location: ''
     });
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setFilters(prev => ({ ...prev, search: searchTerm }));
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const fetchItems = useCallback(async () => {
         try {
@@ -36,6 +46,7 @@ const ItemList = () => {
     };
 
     const clearFilters = () => {
+        setSearchTerm('');
         setFilters({
             search: '',
             type: '',
@@ -64,8 +75,8 @@ const ItemList = () => {
                         <input
                             type="text"
                             placeholder="Search items..."
-                            value={filters.search}
-                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="input"
                         />
                     </div>

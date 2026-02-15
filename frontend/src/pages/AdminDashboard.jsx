@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getClaimStats } from '../services/claimService';
 import LoadingSpinner from '../components/LoadingSpinner';
+import toast from '../utils/toast';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
@@ -17,7 +18,7 @@ const AdminDashboard = () => {
             const data = await getClaimStats();
             setStats(data);
         } catch (error) {
-            console.error('Error fetching admin stats:', error);
+            toast.error(error, 'Failed to fetch claims for verification');
         } finally {
             setLoading(false);
         }

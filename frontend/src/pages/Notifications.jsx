@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getNotifications, markAsRead } from '../services/notificationService';
 import LoadingSpinner from '../components/LoadingSpinner';
+import toast from '../utils/toast';
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -15,7 +16,7 @@ const Notifications = () => {
             const data = await getNotifications();
             setNotifications(data.notifications || []);
         } catch (error) {
-            console.error('Error fetching notifications:', error);
+            toast.error(error, 'Failed to load notifications');
         } finally {
             setLoading(false);
         }
@@ -28,7 +29,7 @@ const Notifications = () => {
                 n._id === id ? { ...n, read: true } : n
             ));
         } catch (error) {
-            console.error('Error marking notification as read:', error);
+            toast.error(error, 'Failed to mark notification as read');
         }
     };
 

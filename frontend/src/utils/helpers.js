@@ -91,7 +91,8 @@ export const isValidEmail = (email) => {
  * Get image URL
  */
 export const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
+    const placeholder = 'https://placehold.co/600x400/f3f4f6/f3f4f6';
+    if (!imagePath) return placeholder;
     if (imagePath.startsWith('http')) return imagePath;
 
     // Normalize path separators

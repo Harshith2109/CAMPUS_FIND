@@ -5,6 +5,9 @@ import { getItemById } from '../services/itemService';
 import { createClaim } from '../services/claimService';
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ImageModal from '../components/ImageModal';
+import { getSettings } from '../services/adminService';
+import toast from '../utils/toast';
 
 const ItemDetail = () => {
     const { id } = useParams();
@@ -13,11 +16,16 @@ const ItemDetail = () => {
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showClaimModal, setShowClaimModal] = useState(false);
+    const [uploadSettings, setUploadSettings] = useState({
+        maxImages: 5,
+        maxSizeMB: 1
+    });
     const [claimData, setClaimData] = useState({
         description: '',
         proofImages: []
     });
     const [submitting, setSubmitting] = useState(false);
+    const [modalInfo, setModalInfo] = useState({ isOpen: false, index: 0, images: [] });
 
     const fetchItem = useCallback(async () => {
         try {
@@ -32,6 +40,20 @@ const ItemDetail = () => {
 
     useEffect(() => {
         fetchItem();
+        const fetchUploadSettings = async () => {
+            try {
+                const data = await getSettings();
+                if (data.settings) {
+                    setUploadSettings({
+                        maxImages: data.settings.maxImagesPerItem || 5,
+                        maxSizeMB: data.settings.maxImageSize || 1
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+            }
+        };
+        fetchUploadSettings();
     }, [fetchItem]);
 
     const handleClaimSubmit = async (e) => {
@@ -44,20 +66,37 @@ const ItemDetail = () => {
         try {
             setSubmitting(true);
             await createClaim(id, claimData);
-            alert('Claim submitted successfully!');
+            toast.success('Claim submitted successfully!');
             setShowClaimModal(false);
             fetchItem();
         } catch (error) {
-            console.error('Error submitting claim:', error);
-            alert('Failed to submit claim. Please try again.');
+            toast.error(error, 'Failed to submit claim. Please try again.');
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleImageChange = (e) => {
-        setClaimData(prev => ({ ...prev, proofImages: Array.from(e.target.files) }));
+        const files = Array.from(e.target.files);
+
+        // Validate number of files
+        if (files.length > uploadSettings.maxImages) {
+            toast.error(`You can only upload a maximum of ${uploadSettings.maxImages} images.`);
+            e.target.value = '';
+            return;
+        }
+
+        // Validate file size
+        const oversizedFile = files.find(file => file.size > uploadSettings.maxSizeMB * 1024 * 1024);
+        if (oversizedFile) {
+            toast.error(`Each image must be smaller than ${uploadSettings.maxSizeMB}MB.`);
+            e.target.value = '';
+            return;
+        }
+
+        setClaimData(prev => ({ ...prev, proofImages: files }));
     };
+
 
     if (loading) {
         return <LoadingSpinner fullScreen />;
@@ -91,35 +130,53 @@ const ItemDetail = () => {
                 <div>
                     {item.images && item.images.length > 0 ? (
                         <div className="card">
-                            <img
-                                src={getImageUrl(item.images[0])}
-                                alt={item.name}
-                                className="w-full h-96 object-cover rounded-lg"
-                                onError={(e) => {
-                                    e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
-                                }}
-                            />
+                            <div className="relative group cursor-pointer" onClick={() => setModalInfo({
+                                isOpen: true,
+                                index: 0,
+                                images: item.images.map(img => getImageUrl(img))
+                            })}>
+                                <img
+                                    src={getImageUrl(item.images[0])}
+                                    alt={item.name}
+                                    className="w-full h-96 object-cover rounded-lg group-hover:opacity-95 transition-opacity"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-10 rounded-lg">
+                                    <div className="bg-white bg-opacity-75 p-3 rounded-full shadow-lg text-gray-800">
+                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
                             {item.images.length > 1 && (
                                 <div className="grid grid-cols-4 gap-2 mt-4">
-                                    {item.images.slice(1).map((img, idx) => (
-                                        <img
-                                            key={idx}
-                                            src={img}
-                                            alt={`${item.name} ${idx + 2}`}
-                                            className="w-full h-20 object-cover rounded"
-                                        />
+                                    {item.images.map((img, idx) => (
+                                        <div key={idx} className="relative group cursor-pointer" onClick={() => setModalInfo({
+                                            isOpen: true,
+                                            index: idx,
+                                            images: item.images.map(i => getImageUrl(i))
+                                        })}>
+                                            <img
+                                                src={getImageUrl(img)}
+                                                alt={`${item.name} ${idx + 1}`}
+                                                className="w-full h-20 object-cover rounded hover:opacity-80 transition-opacity"
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <div className="card bg-gray-100 h-96 flex items-center justify-center">
-                            <svg className="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                        <div className="card overflow-hidden h-96">
+                            <img
+                                src={getImageUrl(null)}
+                                alt="No images available"
+                                className="w-full h-full object-cover opacity-50"
+                            />
                         </div>
                     )}
                 </div>
+
 
                 {/* Details */}
                 <div>
@@ -177,6 +234,23 @@ const ItemDetail = () => {
                                     <p className="text-gray-900">{item.brand}</p>
                                 </div>
                             )}
+
+                            <hr className="border-gray-100 my-6" />
+
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500 mb-3">Reported By</h3>
+                                <div className="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                    <img
+                                        src={getImageUrl(item.reportedBy?.profilePicture)}
+                                        alt={item.reportedBy?.name}
+                                        className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover bg-gray-200 mr-3"
+                                    />
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900 leading-tight">{item.reportedBy?.name || 'Anonymous User'}</p>
+                                        <p className="text-xs text-gray-500">{item.reportedBy?.department || 'Member'}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Claim Button */}
@@ -219,9 +293,22 @@ const ItemDetail = () => {
                             </div>
 
                             <div className="mb-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Proof Images (Optional)
-                                </label>
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                    <div className="flex items-center text-blue-800 text-xs">
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>
+                                            Up to <strong>{uploadSettings.maxImages} images</strong> allowed, max <strong>{uploadSettings.maxSizeMB}MB</strong> each.
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Proof Images
+                                    </label>
+                                    <span className="text-xs text-gray-500">{claimData.proofImages.length}/{uploadSettings.maxImages} selected</span>
+                                </div>
                                 <input
                                     type="file"
                                     multiple
@@ -252,7 +339,15 @@ const ItemDetail = () => {
                     </div>
                 </div>
             )}
+
+            <ImageModal
+                isOpen={modalInfo.isOpen}
+                onClose={() => setModalInfo(prev => ({ ...prev, isOpen: false }))}
+                images={modalInfo.images}
+                initialIndex={modalInfo.index}
+            />
         </div>
+
     );
 };
 

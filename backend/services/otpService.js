@@ -12,14 +12,15 @@ const generateOTP = () => {
  */
 exports.createOTP = async (email) => {
     try {
+        const lowerEmail = email.toLowerCase();
         // Delete any existing OTP for this email
-        await OTP.deleteMany({ email });
+        await OTP.deleteMany({ email: lowerEmail });
 
         const otp = generateOTP();
         const expiryTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
         const otpDocument = await OTP.create({
-            email,
+            email: lowerEmail,
             otp,
             expiresAt: expiryTime
         });
@@ -43,7 +44,8 @@ exports.createOTP = async (email) => {
  */
 exports.verifyOTP = async (email, otp) => {
     try {
-        const otpDocument = await OTP.findOne({ email });
+        const lowerEmail = email.toLowerCase();
+        const otpDocument = await OTP.findOne({ email: lowerEmail });
 
         if (!otpDocument) {
             return {
@@ -71,7 +73,7 @@ exports.verifyOTP = async (email, otp) => {
         }
 
         // Verify OTP
-        if (otpDocument.otp !== otp) {
+        if (otpDocument.otp !== String(otp)) {
             otpDocument.attempts += 1;
             await otpDocument.save();
             return {
@@ -101,10 +103,11 @@ exports.verifyOTP = async (email, otp) => {
  */
 exports.resendOTP = async (email) => {
     try {
+        const lowerEmail = email.toLowerCase();
         // Delete existing OTP
-        await OTP.deleteMany({ email });
+        await OTP.deleteMany({ email: lowerEmail });
 
-        return await this.createOTP(email);
+        return await exports.createOTP(lowerEmail);
     } catch (error) {
         console.error('❌ OTP resend failed:', error.message);
         return {

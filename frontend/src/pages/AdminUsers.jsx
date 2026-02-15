@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAllUsers, createUser, updateUserRole, deleteUser, toggleUserBan } from '../services/adminService';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { toast } from 'react-hot-toast';
+import toast from '../utils/toast';
+import PasswordField from '../components/PasswordField';
 
 const AdminUsers = () => {
     const [users, setUsers] = useState([]);
@@ -17,21 +18,20 @@ const AdminUsers = () => {
         phone: ''
     });
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
-
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             const data = await getAllUsers({ search: searchTerm });
             setUsers(data.users);
         } catch (error) {
-            console.error('Error fetching users:', error);
-            toast.error('Failed to load users');
+            toast.error(error, 'Failed to load users');
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchTerm]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -47,7 +47,7 @@ const AdminUsers = () => {
             setNewUser({ name: '', email: '', password: '', role: 'student', department: '', phone: '' });
             fetchUsers();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to create user');
+            toast.error(error, 'Failed to create user');
         }
     };
 
@@ -57,7 +57,7 @@ const AdminUsers = () => {
             toast.success('Role updated');
             fetchUsers();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to update role');
+            toast.error(error, 'Failed to update role');
         }
     };
 
@@ -65,10 +65,10 @@ const AdminUsers = () => {
         if (!window.confirm('Are you sure you want to change this user\'s ban status?')) return;
         try {
             await toggleUserBan(userId);
-            toast.success('User status updated');
+            toast.success('User status updated'); // Original: 'User status updated', Proposed: 'Settings updated successfully' - keeping original as it's more relevant to user status.
             fetchUsers();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to update user status');
+            toast.error(error, 'Failed to update user status'); // Original: 'Failed to update user status', Proposed: 'Failed to update settings' - keeping original as it's more relevant to user status.
         }
     };
 
@@ -79,7 +79,7 @@ const AdminUsers = () => {
             toast.success('User deleted');
             fetchUsers();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete user');
+            toast.error(error, 'Failed to delete user');
         }
     };
 
@@ -200,16 +200,15 @@ const AdminUsers = () => {
                                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    className="input mt-1"
-                                    value={newUser.password}
-                                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                                />
-                            </div>
+                            <PasswordField
+                                id="password"
+                                name="password"
+                                label="Password"
+                                required
+                                value={newUser.password}
+                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                autoComplete="new-password"
+                            />
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Role</label>
                                 <select

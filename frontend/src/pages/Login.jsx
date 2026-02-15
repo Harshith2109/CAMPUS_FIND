@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login as loginService, resendOtp } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
+
+import PasswordField from '../components/PasswordField';
+import toast from '../utils/toast';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -14,6 +17,16 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
+    // Clear error message after 10 seconds
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => {
+                setError('');
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -23,7 +36,6 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
 
         try {
@@ -35,9 +47,9 @@ const Login = () => {
         } catch (err) {
             if (err.response?.data?.requiresEmailVerification) {
                 setUnverifiedEmail(err.response?.data?.email);
-                setError('Please verify your email first before logging in.');
+                toast.error('Please verify your email first before logging in.');
             } else {
-                setError(err.response?.data?.message || 'Login failed. Please try again.');
+                toast.error(err, 'Login failed. Please try again.');
             }
         } finally {
             setLoading(false);
@@ -49,11 +61,10 @@ const Login = () => {
         setLoading(true);
         try {
             await resendOtp(unverifiedEmail);
-            setError('');
-            alert('Verification code sent to your email. Please check your inbox.');
+            toast.success('Verification code sent to your email. Please check your inbox.');
             navigate('/register');
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to resend verification code.');
+            toast.error(err, 'Failed to resend verification code.');
         } finally {
             setLoading(false);
         }
@@ -74,7 +85,7 @@ const Login = () => {
 
                     {/* Error Message */}
                     {error && (
-                        <div className="mb-4 p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-lg text-sm">
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-medium">
                             {error}
                             {unverifiedEmail && (
                                 <button
@@ -107,18 +118,14 @@ const Login = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                Password *
-                            </label>
-                            <input
+                            <PasswordField
                                 id="password"
                                 name="password"
-                                type="password"
+                                label="Password *"
                                 required
-                                className="input"
-                                placeholder="••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
+                                autoComplete="current-password"
                             />
                             <div className="text-right mt-2">
                                 <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
@@ -135,6 +142,7 @@ const Login = () => {
                             {loading ? 'Signing in...' : 'Sign In'}
                         </button>
                     </form>
+
 
                     {/* Footer */}
                     <div className="mt-6 text-center">

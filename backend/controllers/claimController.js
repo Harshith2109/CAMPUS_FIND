@@ -75,7 +75,7 @@ exports.createClaim = async (req, res, next) => {
             });
         }
 
-        await claim.populate('claimedBy', 'name email phone department');
+        await claim.populate('claimedBy', 'name email phone department profilePicture');
         await claim.populate('item', 'title type category location');
 
         res.status(201).json({
@@ -113,7 +113,7 @@ exports.getClaims = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const claims = await Claim.find(query)
-            .populate('claimedBy', 'name email phone department')
+            .populate('claimedBy', 'name email phone department profilePicture')
             .populate('item', 'title type category location images reportedBy')
             .populate('verifiedBy', 'name email')
             .sort({ createdAt: -1 })
@@ -143,7 +143,7 @@ exports.getClaims = async (req, res, next) => {
 exports.getClaimById = async (req, res, next) => {
     try {
         const claim = await Claim.findById(req.params.id)
-            .populate('claimedBy', 'name email phone department')
+            .populate('claimedBy', 'name email phone department profilePicture')
             .populate('item', 'title type category location images reportedBy')
             .populate('verifiedBy', 'name email');
 
@@ -191,7 +191,7 @@ exports.updateClaimStatus = async (req, res, next) => {
         }
 
         const claim = await Claim.findById(req.params.id)
-            .populate('claimedBy', 'name email')
+            .populate('claimedBy', 'name email profilePicture')
             .populate('item');
 
         if (!claim) {

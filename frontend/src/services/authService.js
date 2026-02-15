@@ -76,10 +76,18 @@ export const changePassword = async (passwordData) => {
 };
 
 /**
+ * Initiate account deletion (send OTP)
+ */
+export const initiateAccountDeletion = async (password) => {
+    const response = await api.post('/auth/initiate-account-deletion', { password });
+    return response.data;
+};
+
+/**
  * Delete account
  */
-export const deleteAccount = async (password) => {
-    const response = await api.delete('/auth/me', { data: { password } });
+export const deleteAccount = async (password, otp) => {
+    const response = await api.delete('/auth/me', { data: { password, otp } });
     return response.data;
 };
 
@@ -107,6 +115,43 @@ export const resetPassword = async (email, newPassword) => {
     return response.data;
 };
 
+
+
+/**
+ * Update profile picture
+ */
+export const updateProfilePicture = async (formData) => {
+    const response = await api.put('/auth/profile/picture', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+};
+
+/**
+ * Remove profile picture
+ */
+export const removeProfilePicture = async () => {
+    const response = await api.delete('/auth/profile/picture');
+    return response.data;
+};
+
+/**
+ * Initiate email change
+ */
+export const initiateEmailChange = async (newEmail) => {
+    const response = await api.post('/auth/initiate-email-change', { newEmail });
+    return response.data;
+};
+
+/**
+ * Verify email change
+ */
+export const verifyEmailChange = async (newEmail, otp) => {
+    const response = await api.put('/auth/verify-email-change', { newEmail, otp });
+    return response.data;
+};
 
 /**
  * Get current user from localStorage

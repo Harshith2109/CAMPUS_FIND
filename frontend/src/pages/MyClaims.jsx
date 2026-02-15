@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getMyClaims, deleteClaim } from '../services/claimService';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ImageModal from '../components/ImageModal';
+import toast from '../utils/toast';
+import { getImageUrl } from '../utils/helpers';
 
 const MyClaims = () => {
     const [claims, setClaims] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [modalInfo, setModalInfo] = useState({ isOpen: false, index: 0, images: [] });
+
 
     useEffect(() => {
         fetchMyClaims();
@@ -16,7 +21,7 @@ const MyClaims = () => {
             const data = await getMyClaims();
             setClaims(data.claims || []);
         } catch (error) {
-            console.error('Error fetching claims:', error);
+            toast.error(error, 'Failed to load your claims');
         } finally {
             setLoading(false);
         }
@@ -28,10 +33,9 @@ const MyClaims = () => {
         try {
             await deleteClaim(id);
             setClaims(claims.filter(claim => claim._id !== id));
-            alert('Claim cancelled successfully');
+            toast.success('Claim cancelled successfully');
         } catch (error) {
-            console.error('Error cancelling claim:', error);
-            alert('Failed to cancel claim');
+            toast.error(error, 'Failed to cancel claim');
         }
     };
 
@@ -65,19 +69,22 @@ const MyClaims = () => {
                             <div className="flex flex-col md:flex-row gap-6">
                                 {/* Item Image */}
                                 <div className="flex-shrink-0">
-                                    {claim.item?.images?.[0] ? (
+                                    <div className="relative group cursor-pointer" onClick={() => setModalInfo({
+                                        isOpen: true,
+                                        index: 0,
+                                        images: (claim.item?.images?.length > 0 ? claim.item.images : [null]).map(img => getImageUrl(img))
+                                    })}>
                                         <img
-                                            src={claim.item.images[0]}
-                                            alt={claim.item.name}
-                                            className="w-full md:w-48 h-48 object-cover rounded-lg"
+                                            src={getImageUrl(claim.item?.images?.[0])}
+                                            alt={claim.item?.name}
+                                            className="w-full md:w-48 h-48 object-cover rounded-lg group-hover:opacity-95 transition-opacity"
                                         />
-                                    ) : (
-                                        <div className="w-full md:w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-10 rounded-lg">
+                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                             </svg>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
 
                                 {/* Claim Details */}
@@ -91,43 +98,71 @@ const MyClaims = () => {
                                                 Claimed on {new Date(claim.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
-                                        <span className={`badge ${getStatusBadge(claim.status)}`}>
+                                        <span className={`badge ${getStatusBadge(claim.status)} `}>
                                             {claim.status}
                                         </span>
                                     </div>
 
-                                    <div className="space-y-2 mb-4">
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Category:</span>
-                                            <span className="ml-2 text-gray-900">{claim.item?.category}</span>
+                                    <div className="space-y-4 mb-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <span className="text-sm font-medium text-gray-500">Category:</span>
+                                                <span className="ml-2 text-gray-900">{claim.item?.category}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm font-medium text-gray-500">Location:</span>
+                                                <span className="ml-2 text-gray-900">{claim.item?.location}</span>
+                                            </div>
                                         </div>
                                         <div>
-                                            <span className="text-sm font-medium text-gray-500">Location:</span>
-                                            <span className="ml-2 text-gray-900">{claim.item?.location}</span>
+                                            <span className="text-sm font-medium text-gray-500 block mb-1">Your Description:</span>
+                                            <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">"{claim.description}"</p>
                                         </div>
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Your Description:</span>
-                                            <p className="text-gray-900 mt-1">{claim.description}</p>
-                                        </div>
+
+                                        {claim.proofImages && claim.proofImages.length > 0 && (
+                                            <div>
+                                                <span className="text-sm font-medium text-gray-500 block mb-2">Proof Images:</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {claim.proofImages.map((img, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className="relative group cursor-pointer"
+                                                            onClick={() => setModalInfo({
+                                                                isOpen: true,
+                                                                index: idx,
+                                                                images: claim.proofImages.map(i => getImageUrl(i))
+                                                            })}
+                                                        >
+                                                            <img
+                                                                src={getImageUrl(img)}
+                                                                alt={`Proof ${idx + 1} `}
+                                                                className="w-16 h-16 object-cover rounded border border-gray-200 hover:border-primary-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {claim.verificationNotes && (
                                             <div>
                                                 <span className="text-sm font-medium text-gray-500">Verification Notes:</span>
-                                                <p className="text-gray-900 mt-1">{claim.verificationNotes}</p>
+                                                <p className="text-gray-900 mt-1 bg-yellow-50 p-2 rounded text-sm">{claim.verificationNotes}</p>
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="flex gap-2">
                                         <Link
-                                            to={`/items/${claim.item?._id}`}
-                                            className="btn btn-secondary"
+                                            to={`/ items / ${claim.item?._id} `}
+                                            className="btn btn-secondary py-2"
                                         >
                                             View Item
                                         </Link>
                                         {claim.status === 'pending' && (
                                             <button
                                                 onClick={() => handleCancelClaim(claim._id)}
-                                                className="btn btn-danger"
+                                                className="btn btn-danger py-2"
                                             >
                                                 Cancel Claim
                                             </button>
@@ -149,7 +184,15 @@ const MyClaims = () => {
                     </Link>
                 </div>
             )}
+
+            <ImageModal
+                isOpen={modalInfo.isOpen}
+                onClose={() => setModalInfo(prev => ({ ...prev, isOpen: false }))}
+                images={modalInfo.images}
+                initialIndex={modalInfo.index}
+            />
         </div>
+
     );
 };
 

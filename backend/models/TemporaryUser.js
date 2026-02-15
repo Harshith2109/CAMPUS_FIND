@@ -54,22 +54,7 @@ const temporaryUserSchema = new mongoose.Schema({
 // Index for faster queries
 temporaryUserSchema.index({ email: 1 });
 
-/**
- * Hash password before saving
- */
-temporaryUserSchema.pre('save', async function (next) {
-    // Only hash if password is modified
-    if (!this.isModified('password')) {
-        return next();
-    }
-
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
+// Hashing is handled in the main User model during verification
+// to avoid double-hashing issues when moving data between collections.
 
 module.exports = mongoose.model('TemporaryUser', temporaryUserSchema);

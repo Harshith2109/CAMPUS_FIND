@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register as registerService, verifyOtp, resendOtp } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
+import PasswordField from '../components/PasswordField';
+import toast from '../utils/toast';
 
 // RVCE Departments
 const DEPARTMENTS = [
@@ -72,7 +74,7 @@ const Register = () => {
                 setOtpResendCountdown(0);
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed. Please try again.');
+            toast.error(err, 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -93,11 +95,12 @@ const Register = () => {
             const data = await verifyOtp(registeredEmail, otp);
 
             if (data.success && data.token) {
+                toast.success('Email verified successfully!');
                 login(data.user, data.token);
                 navigate('/dashboard');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'OTP verification failed. Please try again.');
+            toast.error(err, 'OTP verification failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -125,7 +128,7 @@ const Register = () => {
                 }, 1000);
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+            toast.error(err, 'Failed to resend OTP. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -332,37 +335,25 @@ const Register = () => {
                             <p className="text-xs text-gray-500 mt-1">Select your role at RVCE</p>
                         </div>
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                Password *
-                            </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                className="input"
-                                placeholder="••••••••"
-                                value={formData.password}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <PasswordField
+                            id="password"
+                            name="password"
+                            label="Password *"
+                            required
+                            value={formData.password}
+                            onChange={handleChange}
+                            autoComplete="new-password"
+                        />
 
-                        <div>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                                Confirm Password *
-                            </label>
-                            <input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type="password"
-                                required
-                                className="input"
-                                placeholder="••••••••"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <PasswordField
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            label="Confirm Password *"
+                            required
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            autoComplete="new-password"
+                        />
 
                         <button
                             type="submit"

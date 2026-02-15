@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    profilePicture: {
+        type: String,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -75,6 +79,11 @@ userSchema.index({ role: 1 });
 userSchema.pre('save', async function (next) {
     // Only hash if password is modified
     if (!this.isModified('password')) {
+        return next();
+    }
+
+    // Prevent double hashing if password already looks like a bcrypt hash (60 chars and starts with $2)
+    if (this.password && this.password.startsWith('$2') && this.password.length === 60) {
         return next();
     }
 
@@ -118,6 +127,7 @@ userSchema.methods.getPublicProfile = function () {
         department: this.department,
         verified: this.verified,
         isBanned: this.isBanned,
+        profilePicture: this.profilePicture,
         createdAt: this.createdAt
     };
 };

@@ -208,3 +208,58 @@ exports.sendPasswordResetEmail = async (email, otp) => {
     html
   });
 };
+
+/**
+ * Send OTP email for changing email address
+ */
+exports.sendEmailChangeOtp = async (email, otp) => {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #6366f1;">Email Change Request ✉️</h2>
+      <p>Hi,</p>
+      <p>You have requested to change your email address on CampusFind. To confirm this change, please use the verification code below:</p>
+      <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center;">
+        <p style="color: #6b7280; margin-bottom: 10px;">Your Verification Code:</p>
+        <p style="font-size: 32px; font-weight: bold; color: #6366f1; letter-spacing: 5px; margin: 0;">${otp}</p>
+        <p style="color: #9ca3af; margin-top: 10px; font-size: 12px;">This code will expire in 10 minutes</p>
+      </div>
+      <p><strong>Security Notice:</strong> If you did not request this change, please ignore this email. Your current email address will remain secure.</p>
+      <p style="margin-top: 30px;">Best regards,<br>The CampusFind Team</p>
+    </div>
+  `;
+
+  return await this.sendEmail({
+    to: email,
+    subject: 'CampusFind Email Change Verification - OTP',
+    html
+  });
+};
+/**
+ * Send OTP email for account deletion
+ */
+exports.sendAccountDeletionOtp = async (email, otp) => {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #fee2e2; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #ef4444; padding: 20px; text-align: center;">
+        <h2 style="color: #ffffff; margin: 0;">Security Alert: Account Deletion Request ⚠️</h2>
+      </div>
+      <div style="padding: 30px;">
+        <p>Hi,</p>
+        <p>A request has been made to permanently delete your CampusFind account. This action is **irreversible** and will result in the loss of all your data, including reported items and claims.</p>
+        <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center; border: 1px solid #fecaca;">
+          <p style="color: #991b1b; margin-bottom: 10px; font-weight: bold;">Your Verification Code:</p>
+          <p style="font-size: 32px; font-weight: bold; color: #b91c1c; letter-spacing: 5px; margin: 0;">${otp}</p>
+          <p style="color: #991b1b; margin-top: 10px; font-size: 12px;">This code will expire in 10 minutes</p>
+        </div>
+        <p><strong>Warning:</strong> If you did not request this, please change your password immediately and contact support. Your account is still safe until this code is used.</p>
+        <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">Best regards,<br>The CampusFind Security Team</p>
+      </div>
+    </div>
+  `;
+
+  return await this.sendEmail({
+    to: email,
+    subject: 'CampusFind: Account Deletion Verification Code',
+    html
+  });
+};

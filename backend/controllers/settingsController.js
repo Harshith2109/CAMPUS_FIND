@@ -25,15 +25,18 @@ exports.getSettings = async (req, res, next) => {
  */
 exports.updateSettings = async (req, res, next) => {
     try {
-        const { categories, allowRegistration, maintenanceMode } = req.body;
+        const { categories, allowRegistration, maintenanceMode, maxImagesPerItem, maxImageSize } = req.body;
 
         const settings = await SystemSettings.getSettings();
 
         if (categories) settings.categories = categories;
         if (typeof allowRegistration !== 'undefined') settings.allowRegistration = allowRegistration;
         if (typeof maintenanceMode !== 'undefined') settings.maintenanceMode = maintenanceMode;
+        if (typeof maxImagesPerItem !== 'undefined') settings.maxImagesPerItem = maxImagesPerItem;
+        if (typeof maxImageSize !== 'undefined') settings.maxImageSize = maxImageSize;
 
         await settings.save();
+
 
         res.status(200).json({
             success: true,
