@@ -15,6 +15,22 @@ import toast from '../utils/toast';
 import { useNavigate } from 'react-router-dom';
 import PasswordField from '../components/PasswordField';
 import { getImageUrl } from '../utils/helpers';
+import { Camera, Trash2, Mail, ShieldAlert } from 'lucide-react';
+
+// RVCE Departments
+const DEPARTMENTS = [
+    { value: '', label: '-- Select Department --' },
+    { value: 'Computer Science', label: 'Computer Science & Engineering' },
+    { value: 'Electronics', label: 'Electronics & Communication Engineering' },
+    { value: 'Mechanical', label: 'Mechanical Engineering' },
+    { value: 'Electrical', label: 'Electrical & Electronics Engineering' },
+    { value: 'Civil', label: 'Civil Engineering' },
+    { value: 'Aerospace', label: 'Aerospace Engineering' },
+    { value: 'Biomedical', label: 'Biomedical Engineering' },
+    { value: 'Information Science', label: 'Information Science & Engineering' },
+    { value: 'Administration', label: 'Administration' },
+    { value: 'Other', label: 'Other' }
+];
 
 const Profile = () => {
     const { user, login, logout } = useAuth();
@@ -184,39 +200,34 @@ const Profile = () => {
 
     return (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">User Settings</h1>
+            <h1 className="text-3xl font-bold text-text-main mb-8">User Settings</h1>
 
             {/* Profile Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+            <div className="bg-bg-surface rounded-2xl shadow-sm border border-border-main overflow-hidden mb-8">
                 {/* Header/Banner/Avatar Area */}
-                <div className="bg-indigo-600 h-32 relative">
+                <div className="bg-brand-primary h-32 relative">
                     <div className="absolute -bottom-12 left-8 group">
                         <div className="relative">
                             <img
                                 src={getImageUrl(user?.profilePicture)}
                                 alt={user?.name}
-                                className="w-32 h-32 rounded-2xl border-4 border-white object-cover bg-gray-50 shadow-md"
+                                className="w-32 h-32 rounded-2xl border-4 border-bg-surface object-cover bg-bg-main shadow-md"
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
                                 <button
                                     onClick={() => fileInputRef.current.click()}
-                                    className="p-2 bg-white rounded-full text-indigo-600 hover:bg-gray-100 transition-colors"
+                                    className="p-2 bg-bg-surface rounded-full text-text-brand-primary hover:bg-gray-100 transition-colors"
                                     title="Update Picture"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                                    <Camera className="w-5 h-5" />
                                 </button>
                                 {user?.profilePicture && (
                                     <button
                                         onClick={handleRemovePicture}
-                                        className="p-2 bg-white rounded-full text-red-600 hover:bg-gray-100 transition-colors"
+                                        className="p-2 bg-bg-surface rounded-full text-red-600 hover:bg-gray-100 transition-colors"
                                         title="Remove Picture"
                                     >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
+                                        <Trash2 className="w-5 h-5" />
                                     </button>
                                 )}
                             </div>
@@ -233,28 +244,28 @@ const Profile = () => {
 
                 <div className="pt-16 pb-8 px-8">
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900">{user?.name}</h2>
-                        <p className="text-gray-500">{user?.role} • {user?.department}</p>
+                        <h2 className="text-2xl font-bold text-text-main">{user?.name}</h2>
+                        <p className="text-text-muted">{user?.role} • {user?.department}</p>
                     </div>
 
                     <div className="space-y-8">
                         {/* Profile Info Form */}
                         <form onSubmit={handleProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="col-span-full">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                                <label className="block text-sm font-medium text-text-main mb-1">Display Name</label>
                                 <input
                                     type="text"
-                                    className="input focus:ring-indigo-500"
+                                    className="input focus:ring-brand-primary"
                                     value={profileData.name}
                                     onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <label className="block text-sm font-medium text-text-main mb-1">Phone Number</label>
                                 <input
                                     type="tel"
-                                    className="input focus:ring-indigo-500"
+                                    className="input focus:ring-brand-primary"
                                     value={profileData.phone}
                                     onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                                     placeholder="Add phone number"
@@ -262,13 +273,18 @@ const Profile = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                                <input
-                                    type="text"
-                                    className="input focus:ring-indigo-500"
+                                <label className="block text-sm font-medium text-text-main mb-1">Department</label>
+                                <select
+                                    className="input focus:ring-brand-primary"
                                     value={profileData.department}
                                     onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
-                                />
+                                >
+                                    {DEPARTMENTS.map((dept) => (
+                                        <option key={dept.value} value={dept.value}>
+                                            {dept.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="col-span-full flex justify-end">
@@ -278,16 +294,16 @@ const Profile = () => {
                             </div>
                         </form>
 
-                        <hr className="border-gray-100" />
+                        <hr className="border-border-main" />
 
                         {/* Email Management */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <label className="block text-sm font-medium text-text-main mb-1">Email Address</label>
                             {isEmailEditing ? (
                                 <form onSubmit={handleEmailChangeInitiate} className="flex gap-2">
                                     <input
                                         type="email"
-                                        className="input flex-1 focus:ring-indigo-500"
+                                        className="input flex-1 focus:ring-brand-primary"
                                         value={newEmail}
                                         onChange={(e) => setNewEmail(e.target.value)}
                                         required
@@ -304,41 +320,39 @@ const Profile = () => {
                                     </button>
                                 </form>
                             ) : (
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                <div className="flex items-center justify-between p-3 bg-bg-main border border-border-main">
                                     <div className="flex items-center">
-                                        <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                        </svg>
-                                        <span className="text-gray-900">{user?.email}</span>
+                                        <Mail className="w-5 h-5 text-text-muted mr-2" />
+                                        <span className="text-text-main">{user?.email}</span>
                                     </div>
                                     <button
                                         onClick={() => setIsEmailEditing(true)}
-                                        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                                        className="text-brand-primary hover:text-brand-secondary text-sm font-medium"
                                     >
                                         Change Email
                                     </button>
                                 </div>
                             )}
-                            <p className="mt-2 text-xs text-gray-500">Changing your email requires verification for security.</p>
+                            <p className="mt-2 text-xs text-text-muted">Changing your email requires verification for security.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Security & Privacy Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
+            <div className="bg-bg-surface border border-border-main p-8 space-y-6">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-1">Security & Privacy</h2>
-                    <p className="text-sm text-gray-500">Manage your password and account status.</p>
+                    <h2 className="text-xl font-bold text-text-main mb-1">Security & Privacy</h2>
+                    <p className="text-sm text-text-muted">Manage your password and account status.</p>
                 </div>
 
                 {/* Change Password Toggle */}
-                <div className="border-t border-gray-50 pt-6">
+                <div className="border-t border-border-main pt-6">
                     {!showPasswordForm ? (
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="font-semibold text-gray-900">Password</h3>
-                                <p className="text-sm text-gray-500">Last changed recently</p>
+                                <h3 className="font-semibold text-text-main">Password</h3>
+                                <p className="text-sm text-text-muted">Last changed recently</p>
                             </div>
                             <button
                                 onClick={() => setShowPasswordForm(true)}
@@ -349,7 +363,7 @@ const Profile = () => {
                         </div>
                     ) : (
                         <form onSubmit={handlePasswordChange} className="space-y-4">
-                            <h3 className="font-semibold text-gray-900 mb-4">Update Password</h3>
+                            <h3 className="font-semibold text-text-main mb-4">Update Password</h3>
                             <PasswordField
                                 id="currentPassword"
                                 name="currentPassword"
@@ -397,11 +411,11 @@ const Profile = () => {
                 </div>
 
                 {/* Delete Account */}
-                <div className="border-t border-gray-50 pt-6">
+                <div className="border-t border-border-main pt-6">
                     <div className="flex items-center justify-between">
                         <div>
                             <h3 className="font-semibold text-red-600">Delete Account</h3>
-                            <p className="text-sm text-gray-500">Permanently remove your account and all data.</p>
+                            <p className="text-sm text-text-muted">Permanently remove your account and all data.</p>
                         </div>
                         <button
                             onClick={() => setShowDeleteModal(true)}
@@ -415,25 +429,23 @@ const Profile = () => {
 
             {/* Email OTP Modal */}
             {showEmailOtpModal && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
+                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main">
                         <div className="text-center mb-6">
-                            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
+                            <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Mail className="w-8 h-8 text-brand-primary" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Verify your email</h2>
-                            <p className="text-gray-500 mt-2">
-                                We've sent a 6-digit code to <span className="font-semibold text-gray-900">{newEmail}</span>
+                            <h2 className="text-2xl font-bold text-text-main">Verify your email</h2>
+                            <p className="text-text-muted mt-2">
+                                We've sent a 6-digit code to <span className="font-semibold text-text-main">{newEmail}</span>
                             </p>
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+                            <label className="block text-sm font-medium text-text-main mb-2">Verification Code</label>
                             <input
                                 type="text"
-                                className="input text-center text-3xl tracking-[1rem] focus:ring-indigo-500"
+                                className="input text-center text-3xl tracking-[1rem] focus:ring-brand-primary"
                                 maxLength="6"
                                 placeholder="000000"
                                 value={emailOtp}
@@ -451,7 +463,7 @@ const Profile = () => {
                             </button>
                             <button
                                 onClick={() => setShowEmailOtpModal(false)}
-                                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                                className="text-text-muted hover:text-text-main text-sm font-medium transition-colors"
                             >
                                 Cancel change
                             </button>
@@ -462,18 +474,16 @@ const Profile = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
+                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main">
                         <div className="text-center mb-6">
-                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
+                            <div className="w-16 h-16 bg-brand-danger/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <ShieldAlert className="w-8 h-8 text-brand-danger" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">
+                            <h2 className="text-2xl font-bold text-text-main">
                                 {deletionStep === 1 ? 'Delete Account?' : 'Verify Deletion'}
                             </h2>
-                            <p className="text-gray-500 mt-2">
+                            <p className="text-text-muted mt-2">
                                 {deletionStep === 1
                                     ? 'This action is permanent and cannot be undone. All your reports, claims, and data will be lost.'
                                     : `We've sent a security code to your email. Please enter it to confirm account deletion.`}
@@ -483,7 +493,7 @@ const Profile = () => {
                         {deletionStep === 1 ? (
                             <form onSubmit={handleInitiateDeletion}>
                                 <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm with Password</label>
+                                    <label className="block text-sm font-medium text-text-main mb-1">Confirm with Password</label>
                                     <PasswordField
                                         id="deletePassword"
                                         name="deletePassword"
@@ -499,14 +509,14 @@ const Profile = () => {
                                     <button
                                         type="submit"
                                         disabled={loading || !deletePassword}
-                                        className="btn bg-red-600 hover:bg-red-700 text-white border-transparent w-full py-3"
+                                        className="btn bg-brand-danger hover:bg-brand-danger-hover text-white border-transparent w-full py-3"
                                     >
                                         {loading ? 'Processing...' : 'Request Deletion Code'}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setShowDeleteModal(false)}
-                                        className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                                        className="text-text-muted hover:text-text-main text-sm font-medium transition-colors"
                                     >
                                         I've changed my mind
                                     </button>
@@ -515,10 +525,10 @@ const Profile = () => {
                         ) : (
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2 text-center">Security Code</label>
+                                    <label className="block text-sm font-medium text-text-main mb-2 text-center">Security Code</label>
                                     <input
                                         type="text"
-                                        className="input text-center text-3xl tracking-[1rem] focus:ring-red-500 border-red-100"
+                                        className="input text-center text-3xl tracking-[1rem] focus:ring-brand-danger border-brand-danger/20"
                                         maxLength="6"
                                         placeholder="000000"
                                         value={deleteOtp}
@@ -530,13 +540,13 @@ const Profile = () => {
                                     <button
                                         onClick={handleConfirmDeletion}
                                         disabled={loading || deleteOtp.length !== 6}
-                                        className="btn bg-red-600 hover:bg-red-700 text-white border-transparent w-full py-3"
+                                        className="btn bg-brand-danger hover:bg-brand-danger-hover text-white border-transparent w-full py-3"
                                     >
                                         {loading ? 'Deleting...' : 'Permanently Delete My Account'}
                                     </button>
                                     <button
                                         onClick={() => { setDeletionStep(1); setDeleteOtp(''); }}
-                                        className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                                        className="text-text-muted hover:text-text-main text-sm font-medium transition-colors"
                                     >
                                         Back
                                     </button>

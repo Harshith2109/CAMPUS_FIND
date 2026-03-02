@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { register as registerService, verifyOtp, resendOtp } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
 import PasswordField from '../components/PasswordField';
+import FormField from '../components/FormField';
 import toast from '../utils/toast';
 
 // RVCE Departments
@@ -136,16 +137,16 @@ const Register = () => {
 
     if (step === 'verify-otp') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen flex items-center justify-center bg-bg-main py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full">
-                    <div className="bg-white rounded-2xl shadow-xl p-8">
+                    <div className="bg-bg-surface rounded-2xl shadow-xl p-8 border border-border-main">
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <div className="w-16 h-16 bg-gradient-to-br from-brand-primary to-brand-primary-hover rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <span className="text-white font-bold text-2xl">CF</span>
                             </div>
-                            <h2 className="text-3xl font-bold text-gray-900">Verify Email</h2>
-                            <p className="text-gray-600 mt-2">Enter the OTP sent to your email</p>
+                            <h2 className="text-3xl font-bold text-text-main">Verify Email</h2>
+                            <p className="text-text-muted mt-2">Enter the OTP sent to your email</p>
                         </div>
 
                         {/* Error Message */}
@@ -156,17 +157,14 @@ const Register = () => {
                         )}
 
                         {/* Email Display */}
-                        <div className="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-lg">
-                            <p className="text-sm text-gray-600 mb-1">Verification code sent to:</p>
-                            <p className="text-base font-semibold text-primary-700 truncate">{registeredEmail}</p>
+                        <div className="mb-6 p-4 bg-bg-main border border-border-main rounded-lg">
+                            <p className="text-sm text-text-muted mb-1">Verification code sent to:</p>
+                            <p className="text-base font-semibold text-brand-primary truncate">{registeredEmail}</p>
                         </div>
 
                         {/* OTP Form */}
                         <form onSubmit={handleVerifyOtp} className="space-y-6">
-                            <div>
-                                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
-                                    One-Time Password (OTP) *
-                                </label>
+                            <FormField label="One-Time Password (OTP)" required help="Enter the 6-digit code">
                                 <input
                                     id="otp"
                                     name="otp"
@@ -178,8 +176,7 @@ const Register = () => {
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Enter the 6-digit code</p>
-                            </div>
+                            </FormField>
 
                             <button
                                 type="submit"
@@ -192,16 +189,16 @@ const Register = () => {
 
                         {/* Resend OTP */}
                         <div className="mt-6 text-center">
-                            <p className="text-sm text-gray-600 mb-3">Didn't receive the code?</p>
+                            <p className="text-sm text-text-muted mb-3">Didn't receive the code?</p>
                             {otpResendCountdown > 0 ? (
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-text-muted">
                                     Resend available in {otpResendCountdown}s
                                 </p>
                             ) : (
                                 <button
                                     onClick={handleResendOtp}
                                     disabled={loading || otpResendCountdown > 0}
-                                    className="text-primary-600 hover:text-primary-700 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="text-brand-primary hover:text-brand-primary-hover font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Resend OTP
                                 </button>
@@ -216,7 +213,7 @@ const Register = () => {
                                     setError('');
                                     setOtp('');
                                 }}
-                                className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                                className="text-brand-primary hover:text-brand-primary-hover font-medium text-sm"
                             >
                                 Back to Registration
                             </button>
@@ -228,16 +225,16 @@ const Register = () => {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-bg-main py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
             <div className="max-w-md w-full">
-                <div className="bg-white rounded-2xl shadow-xl p-8">
+                <div className="bg-bg-surface rounded-2xl shadow-xl p-8 border border-border-main">
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-brand-primary to-brand-primary-hover rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <span className="text-white font-bold text-2xl">CF</span>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-                        <p className="text-gray-600 mt-2">Join CampusFind today</p>
+                        <h2 className="text-3xl font-bold text-text-main">Create Account</h2>
+                        <p className="text-text-muted mt-2">Join CampusFind today</p>
                     </div>
 
                     {/* Error Message */}
@@ -249,10 +246,7 @@ const Register = () => {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                                Full Name *
-                            </label>
+                        <FormField label="Full Name" required>
                             <input
                                 id="name"
                                 name="name"
@@ -263,12 +257,9 @@ const Register = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                             />
-                        </div>
+                        </FormField>
 
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                RVCE Email Address *
-                            </label>
+                        <FormField label="RVCE Email Address" required help="Must be your RVCE email">
                             <input
                                 id="email"
                                 name="email"
@@ -279,13 +270,9 @@ const Register = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Must be your RVCE email</p>
-                        </div>
+                        </FormField>
 
-                        <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                                Phone Number
-                            </label>
+                        <FormField label="Phone Number">
                             <input
                                 id="phone"
                                 name="phone"
@@ -295,12 +282,9 @@ const Register = () => {
                                 value={formData.phone}
                                 onChange={handleChange}
                             />
-                        </div>
+                        </FormField>
 
-                        <div>
-                            <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">
-                                Department
-                            </label>
+                        <FormField label="Department">
                             <select
                                 id="department"
                                 name="department"
@@ -314,12 +298,9 @@ const Register = () => {
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </FormField>
 
-                        <div>
-                            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                                User Type *
-                            </label>
+                        <FormField label="User Type" required help="Select your role at RVCE">
                             <select
                                 id="role"
                                 name="role"
@@ -332,8 +313,7 @@ const Register = () => {
                                 <option value="staff">Staff</option>
                                 <option value="admin">Admin</option>
                             </select>
-                            <p className="text-xs text-gray-500 mt-1">Select your role at RVCE</p>
-                        </div>
+                        </FormField>
 
                         <PasswordField
                             id="password"
@@ -366,9 +346,9 @@ const Register = () => {
 
                     {/* Footer */}
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-text-muted">
                             Already have an account?{' '}
-                            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+                            <Link to="/login" className="text-brand-primary hover:text-brand-primary-hover font-medium">
                                 Sign in here
                             </Link>
                         </p>

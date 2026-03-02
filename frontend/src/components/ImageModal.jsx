@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ImageModal = ({ images, initialIndex = 0, isOpen, onClose }) => {
     const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -48,9 +49,7 @@ const ImageModal = ({ images, initialIndex = 0, isOpen, onClose }) => {
                 className="absolute top-4 right-4 text-white hover:text-gray-300 z-[110] bg-black bg-opacity-50 p-2 rounded-full transition-colors"
                 onClick={onClose}
             >
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-8 h-8" />
             </button>
 
             {/* Content Container */}
@@ -61,9 +60,7 @@ const ImageModal = ({ images, initialIndex = 0, isOpen, onClose }) => {
                         className="absolute left-0 text-white hover:text-gray-300 z-[110] bg-black bg-opacity-30 p-4 rounded-r-lg transition-all hover:bg-opacity-50"
                         onClick={handlePrevious}
                     >
-                        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
+                        <ChevronLeft className="w-10 h-10" />
                     </button>
                 )}
 
@@ -87,9 +84,7 @@ const ImageModal = ({ images, initialIndex = 0, isOpen, onClose }) => {
                         className="absolute right-0 text-white hover:text-gray-300 z-[110] bg-black bg-opacity-30 p-4 rounded-l-lg transition-all hover:bg-opacity-50"
                         onClick={handleNext}
                     >
-                        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <ChevronRight className="w-10 h-10" />
                     </button>
                 )}
             </div>

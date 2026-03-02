@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getSettings, updateSettings } from '../services/adminService';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from '../utils/toast';
+import { X, Tags, LayoutGrid, FileUp } from 'lucide-react';
 
 const AdminSettings = () => {
     const [settings, setSettings] = useState(null);
@@ -69,7 +70,12 @@ const AdminSettings = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Category Management */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Item Categories</h2>
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-primary-50 rounded-lg text-primary-600">
+                            <Tags className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900">Item Categories</h2>
+                    </div>
                     <p className="text-gray-600 mb-4 text-sm">Manage the list of categories available for items.</p>
 
                     <div className="flex gap-2 mb-4">
@@ -98,9 +104,7 @@ const AdminSettings = () => {
                                     onClick={() => handleRemoveCategory(category)}
                                     className="ml-2 text-gray-500 hover:text-red-500"
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <X className="w-4 h-4" />
                                 </button>
                             </span>
                         ))}
@@ -109,7 +113,12 @@ const AdminSettings = () => {
 
                 {/* General Settings */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">General Configuration</h2>
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-success-50 rounded-lg text-success-600">
+                            <LayoutGrid className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900">General Configuration</h2>
+                    </div>
 
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -150,7 +159,12 @@ const AdminSettings = () => {
 
                 {/* File Management Settings */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">File Management</h2>
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-warning-50 rounded-lg text-warning-600">
+                            <FileUp className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900">File Management</h2>
+                    </div>
                     <p className="text-gray-600 mb-4 text-sm">Configure upload limits for images.</p>
 
                     <div className="space-y-4">

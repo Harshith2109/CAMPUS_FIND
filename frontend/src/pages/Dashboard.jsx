@@ -6,7 +6,20 @@ import { getMyClaims } from '../services/claimService';
 import { getNotifications } from '../services/notificationService';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ItemCard from '../components/ItemCard';
+import ActionCard from '../components/ActionCard';
+import StatCard from '../components/StatCard';
+import SectionHeader from '../components/SectionHeader';
 import toast from '../utils/toast';
+import {
+    CirclePlus,
+    ScanSearch,
+    PackageOpen,
+    Sparkles,
+    ClipboardList,
+    Bell,
+    ChevronRight,
+    Package
+} from 'lucide-react';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -41,89 +54,82 @@ const Dashboard = () => {
         return <LoadingSpinner fullScreen />;
     }
 
+    const matchedItemsCount = myItems.filter(item => item.matchedItems?.length > 0).length;
+    const unreadCount = notifications.filter(n => !n.read).length;
+
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="section-container px-4 sm:px-6 lg:px-8 py-8 space-y-10">
             {/* Welcome Section */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">
-                    Welcome back, {user?.name}!
-                </h1>
-                <p className="text-gray-600 mt-2">
-                    Here's what's happening with your items and claims
-                </p>
-            </div>
+            <SectionHeader
+                title={`Welcome back, ${user?.name}! 👋`}
+                subtitle="Here's what's happening with your items and claims"
+            />
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-2 gap-4 mb-8">
-                <Link to="/report-item" className="card hover:shadow-lg transition-shadow bg-gradient-to-br from-primary-500 to-primary-600 text-white">
-                    <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                        </div>
-                        <div className="ml-4">
-                            <h3 className="text-xl font-semibold">Report an Item</h3>
-                            <p className="text-primary-100">Lost or found something?</p>
-                        </div>
-                    </div>
+            <div className="grid md:grid-cols-2 gap-8 mb-10">
+                <Link to="/report-item">
+                    <ActionCard
+                        color="primary"
+                        title="Report an Item"
+                        description="Lost or found something? Post it now"
+                        icon={<CirclePlus className="w-8 h-8" />}
+                    />
                 </Link>
 
-                <Link to="/items" className="card hover:shadow-lg transition-shadow bg-gradient-to-br from-success-500 to-success-600 text-white">
-                    <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <div className="ml-4">
-                            <h3 className="text-xl font-semibold">Browse Items</h3>
-                            <p className="text-success-100">Search for your lost items</p>
-                        </div>
-                    </div>
+                <Link to="/items">
+                    <ActionCard
+                        color="success"
+                        title="Browse Items"
+                        description="Search through all reported items"
+                        icon={<ScanSearch className="w-8 h-8" />}
+                    />
                 </Link>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid md:grid-cols-4 gap-4 mb-8">
-                <div className="card bg-primary-50">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-primary-600">{myItems.length}</div>
-                        <div className="text-sm text-gray-600 mt-1">My Items</div>
-                    </div>
-                </div>
-                <div className="card bg-success-50">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-success-600">
-                            {myItems.filter(item => item.matchedItems?.length > 0).length}
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">Matches Found</div>
-                    </div>
-                </div>
-                <div className="card bg-warning-50">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-warning-600">{myClaims.length}</div>
-                        <div className="text-sm text-gray-600 mt-1">My Claims</div>
-                    </div>
-                </div>
-                <div className="card bg-purple-50">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-purple-600">
-                            {notifications.filter(n => !n.read).length}
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">Unread Notifications</div>
-                    </div>
+            <div>
+                <SectionHeader title="Quick Overview" />
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+                    <StatCard
+                        label="My Items"
+                        value={myItems.length}
+                        color="primary"
+                        icon={<PackageOpen className="w-6 h-6" />}
+                    />
+                    <StatCard
+                        label="Matches Found"
+                        value={matchedItemsCount}
+                        changeType="positive"
+                        color="success"
+                        icon={<Sparkles className="w-6 h-6" />}
+                    />
+                    <StatCard
+                        label="My Claims"
+                        value={myClaims.length}
+                        color="warning"
+                        icon={<ClipboardList className="w-6 h-6" />}
+                    />
+                    <StatCard
+                        label="Unread Notifications"
+                        value={unreadCount}
+                        color="primary"
+                        icon={<Bell className="w-6 h-6" />}
+                    />
                 </div>
             </div>
 
             {/* Recent Items */}
-            <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900">My Recent Items</h2>
-                    <Link to="/my-items" className="text-primary-600 hover:text-primary-700 font-medium">
-                        View All →
-                    </Link>
-                </div>
+            <section className="mb-8">
+                <SectionHeader
+                    title="My Recent Items"
+                    action={
+                        <Link to="/my-items" className="text-brand-primary hover:text-brand-primary-hover font-medium flex items-center gap-1">
+                            View All
+                            <ChevronRight className="w-4 h-4" />
+                        </Link>
+                    }
+                    divided
+                />
                 {myItems.length > 0 ? (
                     <div className="grid md:grid-cols-3 gap-6">
                         {myItems.slice(0, 3).map(item => (
@@ -132,43 +138,43 @@ const Dashboard = () => {
                     </div>
                 ) : (
                     <div className="card text-center py-12">
-                        <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                        <p className="text-gray-600 mb-4">You haven't reported any items yet</p>
+                        <div className="w-20 h-20 bg-bg-main rounded-full flex-center mx-auto mb-4 border border-border-main">
+                            <PackageOpen className="w-10 h-10 text-text-muted" />
+                        </div>
+                        <p className="text-text-muted mb-4 font-medium">You haven't reported any items yet</p>
                         <Link to="/report-item" className="btn btn-primary">
                             Report Your First Item
                         </Link>
                     </div>
                 )}
-            </div>
+            </section>
 
             {/* Recent Notifications */}
-            <div>
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900">Recent Notifications</h2>
-                    <Link to="/notifications" className="text-primary-600 hover:text-primary-700 font-medium">
-                        View All →
-                    </Link>
-                </div>
+            <section>
+                <SectionHeader
+                    title="Recent Notifications"
+                    action={
+                        <Link to="/notifications" className="text-brand-primary hover:text-brand-primary-hover font-medium flex items-center gap-1">
+                            View All
+                            <ChevronRight className="w-4 h-4" />
+                        </Link>
+                    }
+                    divided
+                />
                 {notifications.length > 0 ? (
-                    <div className="card divide-y">
+                    <div className="card divide-y divide-border-main">
                         {notifications.map(notif => (
-                            <div key={notif._id} className={`py-4 ${!notif.read ? 'bg-primary-50' : ''}`}>
-                                <div className="flex items-start">
-                                    <div className="flex-shrink-0">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notif.type === 'match' ? 'bg-success-100 text-success-600' :
-                                            notif.type === 'claim' ? 'bg-warning-100 text-warning-600' :
-                                                'bg-primary-100 text-primary-600'
-                                            }`}>
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                            </svg>
-                                        </div>
+                            <div key={notif._id} className={`py-4 px-6 ${!notif.read ? 'bg-brand-primary/10' : 'hover:bg-bg-main'} transition-colors`}>
+                                <div className="flex items-start gap-4">
+                                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex-center ${notif.type === 'match' ? 'bg-brand-success/20 text-brand-success' :
+                                        notif.type === 'claim' ? 'bg-brand-warning/20 text-brand-warning' :
+                                            'bg-brand-primary/20 text-brand-primary'
+                                        }`}>
+                                        <Bell className="w-5 h-5" />
                                     </div>
-                                    <div className="ml-4 flex-1">
-                                        <h4 className="font-semibold text-gray-900">{notif.title}</h4>
-                                        <p className="text-sm text-gray-600">{notif.message}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-semibold text-text-main">{notif.title}</h4>
+                                        <p className="text-sm text-text-muted mt-1">{notif.message}</p>
                                     </div>
                                 </div>
                             </div>
@@ -176,10 +182,10 @@ const Dashboard = () => {
                     </div>
                 ) : (
                     <div className="card text-center py-8">
-                        <p className="text-gray-600">No notifications yet</p>
+                        <p className="text-gray-500">No notifications yet</p>
                     </div>
                 )}
-            </div>
+            </section>
         </div>
     );
 };

@@ -1,10 +1,13 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useState, useEffect, useCallback } from 'react';
 import { getUnreadCount } from '../services/notificationService';
+import { Bell, Menu, X, User, LogOut, ScanSearch, CirclePlus, PackageOpen, ShieldCheck, LayoutDashboard, ClipboardList, MapPin, Shield } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
+    const { pathname } = useLocation();
     const [unreadCount, setUnreadCount] = useState(0);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -30,55 +33,69 @@ const Navbar = () => {
         startPolling();
     }, [user, fetchUnreadCount]);
 
+    const isActive = (path) => pathname === path;
+
     return (
-        <nav className="bg-white shadow-md sticky top-0 z-50">
+        <nav className="bg-bg-surface shadow-md sticky top-0 z-50 border-b border-border-main">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     {/* Logo and Brand */}
                     <div className="flex items-center">
-                        <Link to="/" className="flex items-center space-x-2">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-xl">CF</span>
+                        <Link to="/" className="flex items-center space-x-3 group">
+                            <div className="relative w-10 h-10 flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-400 rounded-xl shadow-lg shadow-primary-500/30 group-hover:shadow-primary-500/50 transition-all duration-300 group-hover:scale-105">
+                                <MapPin className="w-6 h-6 text-white" strokeWidth={2.5} />
                             </div>
-                            <span className="text-xl font-bold text-gray-900">CampusFind</span>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-extrabold text-text-main tracking-tight leading-none">
+                                    Campus<span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-primary-500">Find</span>
+                                </span>
+                                <span className="text-[0.65rem] font-medium text-text-muted tracking-wider uppercase leading-none mt-0.5">
+                                    Lost & Found
+                                </span>
+                            </div>
                         </Link>
                     </div>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-4">
+                    <div className="hidden md:flex items-center space-x-1">
                         {user ? (
                             <>
-                                <Link to="/dashboard" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/dashboard" className={`px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${isActive('/dashboard') ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'text-text-muted hover:text-brand-primary hover:bg-bg-main'}`}>
+                                    <LayoutDashboard className={`w-4 h-4 ${isActive('/dashboard') ? 'text-brand-primary' : ''}`} />
                                     Dashboard
                                 </Link>
-                                <Link to="/items" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/items" className={`px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${isActive('/items') ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'text-text-muted hover:text-brand-primary hover:bg-bg-main'}`}>
+                                    <ScanSearch className={`w-4 h-4 ${isActive('/items') ? 'text-brand-primary' : ''}`} />
                                     Browse Items
                                 </Link>
-                                <Link to="/report-item" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/report-item" className={`px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${isActive('/report-item') ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'text-text-muted hover:text-brand-primary hover:bg-bg-main'}`}>
+                                    <CirclePlus className={`w-4 h-4 ${isActive('/report-item') ? 'text-brand-primary' : ''}`} />
                                     Report Item
                                 </Link>
-                                <Link to="/my-items" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/my-items" className={`px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${isActive('/my-items') ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'text-text-muted hover:text-brand-primary hover:bg-bg-main'}`}>
+                                    <PackageOpen className={`w-4 h-4 ${isActive('/my-items') ? 'text-brand-primary' : ''}`} />
                                     My Items
                                 </Link>
-                                <Link to="/my-claims" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/my-claims" className={`px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${isActive('/my-claims') ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'text-text-muted hover:text-brand-primary hover:bg-bg-main'}`}>
+                                    <ClipboardList className={`w-4 h-4 ${isActive('/my-claims') ? 'text-brand-primary' : ''}`} />
                                     My Claims
                                 </Link>
                                 {(user.role === 'staff' || user.role === 'admin') && (
-                                    <Link to="/verify-claims" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                    <Link to="/verify-claims" className={`px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${isActive('/verify-claims') ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'text-text-muted hover:text-brand-primary hover:bg-bg-main'}`}>
+                                        <ShieldCheck className={`w-4 h-4 ${isActive('/verify-claims') ? 'text-brand-primary' : ''}`} />
                                         Verify Claims
                                     </Link>
                                 )}
                                 {user.role === 'admin' && (
-                                    <Link to="/admin" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                    <Link to="/admin" className={`px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${isActive('/admin') ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'text-text-muted hover:text-brand-primary hover:bg-bg-main'}`}>
+                                        <Shield className={`w-4 h-4 ${isActive('/admin') ? 'text-brand-primary' : ''}`} />
                                         Admin
                                     </Link>
                                 )}
 
                                 {/* Notifications */}
-                                <Link to="/notifications" className="relative p-2 text-gray-700 hover:text-primary-600">
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                    </svg>
+                                <Link to="/notifications" className="relative p-2 text-text-main hover:text-brand-primary hover-rotate">
+                                    <Bell className="w-6 h-6" />
                                     {unreadCount > 0 && (
                                         <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-danger-500 rounded-full">
                                             {unreadCount}
@@ -87,30 +104,30 @@ const Navbar = () => {
                                 </Link>
 
                                 {/* User Menu */}
-                                <div className="flex items-center space-x-3">
-                                    <div className="text-right">
-                                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                                        <p className="text-xs text-gray-500 capitalize">{user.role}</p>
-                                    </div>
-                                    <Link
-                                        to="/profile"
-                                        className="btn btn-outline text-sm"
-                                    >
-                                        Profile
+                                <div className="flex items-center space-x-4">
+                                    <Link to="/profile" className="text-right hover:text-brand-primary transition-colors group">
+                                        <div className="text-right">
+                                            <p className="text-sm font-medium text-text-main group-hover:text-brand-primary">{user.name}</p>
+                                            <p className="text-xs text-text-muted capitalize">{user.role}</p>
+                                        </div>
                                     </Link>
                                     <button
                                         onClick={logout}
-                                        className="btn btn-secondary text-sm"
+                                        className="btn btn-secondary text-sm gap-2"
                                     >
+                                        <LogOut className="w-4 h-4" />
                                         Logout
                                     </button>
+                                    <ThemeToggle />
                                 </div>
                             </>
                         ) : (
                             <>
-                                <Link to="/items" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/items" className="text-text-main hover:text-brand-primary px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <ScanSearch className="w-4 h-4" />
                                     Browse Items
                                 </Link>
+                                <ThemeToggle />
                                 <Link to="/login" className="btn btn-secondary text-sm">
                                     Login
                                 </Link>
@@ -125,15 +142,13 @@ const Navbar = () => {
                     <div className="md:hidden flex items-center">
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="text-gray-700 hover:text-primary-600 p-2"
+                            className="text-text-main hover:text-brand-primary p-2"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                {mobileMenuOpen ? (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                ) : (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                )}
-                            </svg>
+                            {mobileMenuOpen ? (
+                                <X className="w-6 h-6" />
+                            ) : (
+                                <Menu className="w-6 h-6" />
+                            )}
                         </button>
                     </div>
                 </div>
@@ -143,53 +158,71 @@ const Navbar = () => {
                     <div className="md:hidden pb-4">
                         {user ? (
                             <div className="space-y-2">
-                                <Link to="/dashboard" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/profile" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium">
+                                    My Profile
+                                </Link>
+                                <Link to="/dashboard" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <LayoutDashboard className="w-4 h-4" />
                                     Dashboard
                                 </Link>
-                                <Link to="/items" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/items" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <ScanSearch className="w-4 h-4" />
                                     Browse Items
                                 </Link>
-                                <Link to="/report-item" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/report-item" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <CirclePlus className="w-4 h-4" />
                                     Report Item
                                 </Link>
-                                <Link to="/my-items" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/my-items" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <PackageOpen className="w-4 h-4" />
                                     My Items
                                 </Link>
-                                <Link to="/my-claims" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/my-claims" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <ClipboardList className="w-4 h-4" />
                                     My Claims
                                 </Link>
+                                <Link to="/notifications" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <Bell className="w-4 h-4" />
+                                    Notifications {unreadCount > 0 && `(${unreadCount})`}
+                                </Link>
                                 {(user.role === 'staff' || user.role === 'admin') && (
-                                    <Link to="/verify-claims" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                    <Link to="/verify-claims" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                        <ShieldCheck className="w-4 h-4" />
                                         Verify Claims
                                     </Link>
                                 )}
-                                <Link to="/notifications" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
-                                    Notifications {unreadCount > 0 && `(${unreadCount})`}
-                                </Link>
                                 {user.role === 'admin' && (
-                                    <Link to="/admin" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                    <Link to="/admin" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                        <Shield className="w-4 h-4" />
                                         Admin
                                     </Link>
                                 )}
-                                <Link to="/profile" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
-                                    My Profile
-                                </Link>
+                                <div className="flex items-center justify-between px-3 py-2">
+                                    <span className="text-sm font-medium text-text-muted">Theme</span>
+                                    <ThemeToggle />
+                                </div>
                                 <button
                                     onClick={logout}
-                                    className="block w-full text-left text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
+                                    className="block w-full text-left text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
                                 >
+                                    <LogOut className="w-4 h-4" />
                                     Logout
                                 </button>
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                <Link to="/items" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/items" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+                                    <ScanSearch className="w-4 h-4" />
                                     Browse Items
                                 </Link>
-                                <Link to="/login" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <div className="flex items-center justify-between px-3 py-2">
+                                    <span className="text-sm font-medium text-text-muted">Theme</span>
+                                    <ThemeToggle />
+                                </div>
+                                <Link to="/login" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium">
                                     Login
                                 </Link>
-                                <Link to="/register" className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                                <Link to="/register" className="block text-text-main hover:bg-bg-surface px-3 py-2 rounded-md text-sm font-medium">
                                     Register
                                 </Link>
                             </div>
@@ -197,7 +230,7 @@ const Navbar = () => {
                     </div>
                 )}
             </div>
-        </nav>
+        </nav >
     );
 };
 

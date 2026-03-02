@@ -147,15 +147,15 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-bg-main py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full">
-                <div className="bg-white rounded-2xl shadow-xl p-8">
+                <div className="bg-bg-surface rounded-2xl shadow-xl p-8 border border-border-main">
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-brand-primary to-brand-primary-hover rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <span className="text-white font-bold text-2xl">CF</span>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900">
+                        <h2 className="text-3xl font-bold text-text-main">
                             {step === 'email' && 'Reset Password'}
                             {step === 'verify-otp' && 'Verify OTP'}
                             {step === 'reset-password' && 'Create New Password'}
@@ -169,7 +169,7 @@ const ForgotPassword = () => {
 
                     {/* Error Message */}
                     {error && (
-                        <div className="mb-4 p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-lg text-sm">
+                        <div className="mb-4 p-4 bg-brand-danger/10 border border-brand-danger/20 text-brand-danger rounded-lg text-sm">
                             {error}
                         </div>
                     )}
@@ -178,7 +178,7 @@ const ForgotPassword = () => {
                     {step === 'email' && (
                         <form onSubmit={handleRequestReset} className="space-y-6">
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="email" className="block text-sm font-medium text-text-main mb-2">
                                     RVCE Email Address *
                                 </label>
                                 <input
@@ -207,14 +207,14 @@ const ForgotPassword = () => {
                     {step === 'verify-otp' && (
                         <>
                             {/* Email Display */}
-                            <div className="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-lg">
-                                <p className="text-sm text-gray-600 mb-1">Reset code sent to:</p>
-                                <p className="text-base font-semibold text-primary-700 truncate">{formData.email}</p>
+                            <div className="mb-6 p-4 bg-bg-main border border-border-main rounded-lg">
+                                <p className="text-sm text-text-muted mb-1">Reset code sent to:</p>
+                                <p className="text-base font-semibold text-brand-primary truncate">{formData.email}</p>
                             </div>
 
                             <form onSubmit={handleVerifyOtp} className="space-y-6">
                                 <div>
-                                    <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="otp" className="block text-sm font-medium text-text-main mb-2">
                                         One-Time Password (OTP) *
                                     </label>
                                     <input
@@ -242,7 +242,7 @@ const ForgotPassword = () => {
 
                             {/* Resend OTP */}
                             <div className="mt-6 text-center">
-                                <p className="text-sm text-gray-600 mb-3">Didn't receive the code?</p>
+                                <p className="text-sm text-text-muted mb-3">Didn't receive the code?</p>
                                 {otpResendCountdown > 0 ? (
                                     <p className="text-sm text-gray-500">
                                         Resend available in {otpResendCountdown}s

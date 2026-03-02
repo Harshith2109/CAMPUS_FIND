@@ -4,6 +4,13 @@ import { createItem } from '../services/itemService';
 import { getSettings } from '../services/adminService';
 import ImageModal from '../components/ImageModal';
 import toast from '../utils/toast';
+import {
+    PackageSearch,
+    Info,
+    ZoomIn,
+    PackagePlus,
+    CirclePlus
+} from 'lucide-react';
 
 const ReportItem = () => {
     const navigate = useNavigate();
@@ -96,214 +103,228 @@ const ReportItem = () => {
     return (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Report an Item</h1>
-                <p className="text-gray-600 mt-2">Help us reunite lost items with their owners</p>
+                <h1 className="text-3xl font-bold text-text-main text-center">Report an Item</h1>
+                <p className="text-text-muted mt-2 text-center">Help us reunite lost items with their owners</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="card">
+            <form onSubmit={handleSubmit} className="card bg-bg-surface border border-border-main shadow-xl rounded-2xl p-6 md:p-8">
                 {/* Type Selection */}
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Item Type *
+                <div className="mb-8">
+                    <label className="block text-sm font-bold text-text-muted uppercase tracking-wider mb-4">
+                        What happened? *
                     </label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                         <button
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, type: 'lost' }))}
-                            className={`p-4 border-2 rounded-lg transition-all ${formData.type === 'lost'
-                                ? 'border-danger-500 bg-danger-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                            className={`p-6 border-2 rounded-2xl transition-all duration-300 group ${formData.type === 'lost'
+                                ? 'border-brand-danger bg-brand-danger/10 shadow-lg shadow-brand-danger/5'
+                                : 'border-border-main bg-bg-main hover:border-text-muted'
                                 }`}
                         >
                             <div className="text-center">
-                                <svg className={`w-10 h-10 mx-auto mb-2 ${formData.type === 'lost' ? 'text-danger-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 className="font-semibold">Lost Item</h3>
-                                <p className="text-sm text-gray-600">I lost something</p>
+                                <PackageSearch className={`w-12 h-12 mx-auto mb-3 transition-colors ${formData.type === 'lost' ? 'text-brand-danger' : 'text-text-muted group-hover:text-text-main'}`} />
+                                <h3 className={`font-bold text-lg mb-1 ${formData.type === 'lost' ? 'text-brand-danger' : 'text-text-main'}`}>Lost Item</h3>
+                                <p className="text-sm text-text-muted">I lost something</p>
                             </div>
                         </button>
                         <button
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, type: 'found' }))}
-                            className={`p-4 border-2 rounded-lg transition-all ${formData.type === 'found'
-                                ? 'border-success-500 bg-success-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                            className={`p-6 border-2 rounded-2xl transition-all duration-300 group ${formData.type === 'found'
+                                ? 'border-brand-success bg-brand-success/10 shadow-lg shadow-brand-success/5'
+                                : 'border-border-main bg-bg-main hover:border-text-muted'
                                 }`}
                         >
                             <div className="text-center">
-                                <svg className={`w-10 h-10 mx-auto mb-2 ${formData.type === 'found' ? 'text-success-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 className="font-semibold">Found Item</h3>
-                                <p className="text-sm text-gray-600">I found something</p>
+                                <PackagePlus className={`w-12 h-12 mx-auto mb-3 transition-colors ${formData.type === 'found' ? 'text-brand-success' : 'text-text-muted group-hover:text-text-main'}`} />
+                                <h3 className={`font-bold text-lg mb-1 ${formData.type === 'found' ? 'text-brand-success' : 'text-text-main'}`}>Found Item</h3>
+                                <p className="text-sm text-text-muted">I found something</p>
                             </div>
                         </button>
                     </div>
                 </div>
 
-                {/* Item Name */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Item Name *
-                    </label>
-                    <input
-                        type="text"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        className="input"
-                        required
-                        placeholder="e.g., iPhone 13 Pro"
-                    />
-                </div>
+                <div className="space-y-6">
+                    {/* Item Name */}
+                    <div>
+                        <label className="block text-sm font-bold text-text-muted uppercase tracking-wider mb-2">
+                            Item Name *
+                        </label>
+                        <input
+                            type="text"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            className="input focus:ring-brand-primary/20"
+                            required
+                            placeholder="e.g., iPhone 13 Pro"
+                        />
+                    </div>
 
-                {/* Category */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Category *
-                    </label>
-                    <select
-                        name="category"
-                        value={formData.category}
-                        onChange={handleChange}
-                        className="input"
-                        required
-                    >
-                        <option value="">Select a category</option>
-                        {categories.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
-                </div>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {/* Category */}
+                        <div>
+                            <label className="block text-sm font-bold text-text-muted uppercase tracking-wider mb-2">
+                                Category *
+                            </label>
+                            <select
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                className="input focus:ring-brand-primary/20"
+                                required
+                            >
+                                <option value="">Select a category</option>
+                                {categories.map((cat) => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                {/* Description */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Description *
-                    </label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="input"
-                        rows="4"
-                        required
-                        placeholder="Provide detailed description..."
-                    />
-                </div>
+                        {/* Date */}
+                        <div>
+                            <label className="block text-sm font-bold text-text-muted uppercase tracking-wider mb-2">
+                                Date {formData.type === 'lost' ? 'Lost' : 'Found'} *
+                            </label>
+                            <input
+                                type="date"
+                                name="date"
+                                value={formData.date}
+                                onChange={handleChange}
+                                className="input focus:ring-brand-primary/20"
+                                required
+                                max={new Date().toISOString().split('T')[0]}
+                            />
+                        </div>
+                    </div>
 
-                {/* Location */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Location *
-                    </label>
-                    <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleChange}
-                        className="input"
-                        required
-                        placeholder="e.g., Library, Building A, Room 101"
-                    />
-                </div>
+                    {/* Location */}
+                    <div>
+                        <label className="block text-sm font-bold text-text-muted uppercase tracking-wider mb-2">
+                            Location *
+                        </label>
+                        <input
+                            type="text"
+                            name="location"
+                            value={formData.location}
+                            onChange={handleChange}
+                            className="input focus:ring-brand-primary/20"
+                            required
+                            placeholder="e.g., Library, Building A, Room 101"
+                        />
+                    </div>
 
-                {/* Date */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Date {formData.type === 'lost' ? 'Lost' : 'Found'} *
-                    </label>
-                    <input
-                        type="date"
-                        name="date"
-                        value={formData.date}
-                        onChange={handleChange}
-                        className="input"
-                        required
-                        max={new Date().toISOString().split('T')[0]}
-                    />
-                </div>
+                    {/* Description */}
+                    <div>
+                        <label className="block text-sm font-bold text-text-muted uppercase tracking-wider mb-2">
+                            Description *
+                        </label>
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            className="input focus:ring-brand-primary/20"
+                            rows="4"
+                            required
+                            placeholder="Provide detailed description..."
+                        />
+                    </div>
 
-                {/* Color */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Color
-                    </label>
-                    <input
-                        type="text"
-                        name="color"
-                        value={formData.color}
-                        onChange={handleChange}
-                        className="input"
-                        placeholder="e.g., Black, Blue"
-                    />
-                </div>
+                    {/* Color */}
+                    <div>
+                        <label className="block text-sm font-bold text-text-muted uppercase tracking-wider mb-2">
+                            Color
+                        </label>
+                        <input
+                            type="text"
+                            name="color"
+                            value={formData.color}
+                            onChange={handleChange}
+                            className="input focus:ring-brand-primary/20"
+                            placeholder="e.g., Black, Blue"
+                        />
+                    </div>
 
-                {/* Images */}
-                <div className="mb-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                        <div className="flex items-center text-blue-800 text-sm">
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>
-                                You can upload up to <strong>{uploadSettings.maxImages} images</strong>.
-                                Each image must be under <strong>{uploadSettings.maxSizeMB}MB</strong>.
+                    {/* Images */}
+                    <div className="pt-4 border-t border-border-main">
+                        <div className="bg-brand-primary/5 border border-brand-primary/10 rounded-2xl p-4 mb-6">
+                            <div className="flex items-center text-brand-primary text-sm font-medium">
+                                <Info className="w-5 h-5 mr-3 flex-shrink-0" />
+                                <span>
+                                    You can upload up to <strong>{uploadSettings.maxImages} images</strong>.
+                                    Each image must be under <strong>{uploadSettings.maxSizeMB}MB</strong>.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center mb-3">
+                            <label className="block text-sm font-bold text-text-muted uppercase tracking-wider">
+                                Upload Images
+                            </label>
+                            <span className="text-xs font-bold text-text-muted bg-bg-main px-2 py-1 rounded-md border border-border-main">
+                                {formData.images.length}/{uploadSettings.maxImages}
                             </span>
                         </div>
-                    </div>
-
-                    <div className="flex justify-between items-center mb-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                            Upload Images
-                        </label>
-                        <span className="text-xs text-gray-500">{formData.images.length}/{uploadSettings.maxImages} selected</span>
-                    </div>
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="input"
-                    />
-                    {previewImages.length > 0 && (
-                        <div className="grid grid-cols-4 gap-2 mt-4">
-                            {previewImages.map((url, idx) => (
-                                <div key={idx} className="relative group cursor-pointer" onClick={() => setModalInfo({ isOpen: true, index: idx })}>
-                                    <img
-                                        src={url}
-                                        alt={`Preview ${idx + 1} `}
-                                        className="w-full h-24 object-cover rounded hover:opacity-90 transition-opacity"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-20 rounded">
-                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="relative group">
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 cursor-pointer"
+                            />
                         </div>
-                    )}
-                </div>
 
-                {/* Submit Button */}
-                <div className="flex gap-4">
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="btn btn-secondary flex-1"
-                        disabled={submitting}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        className="btn btn-primary flex-1"
-                        disabled={submitting}
-                    >
-                        {submitting ? 'Submitting...' : 'Report Item'}
-                    </button>
+                        {previewImages.length > 0 && (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                                {previewImages.map((url, idx) => (
+                                    <div key={idx} className="relative group cursor-pointer aspect-square rounded-xl overflow-hidden border-2 border-border-main hover:border-brand-primary transition-all" onClick={() => setModalInfo({ isOpen: true, index: idx })}>
+                                        <img
+                                            src={url}
+                                            alt={`Preview ${idx + 1} `}
+                                            className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-[2px]">
+                                            <ZoomIn className="w-6 h-6 text-white" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="btn btn-secondary flex-1 py-4 text-base font-bold shadow-sm"
+                            disabled={submitting}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary flex-1 py-4 text-base font-bold shadow-lg shadow-brand-primary/20"
+                            disabled={submitting}
+                        >
+                            {submitting ? (
+                                <span className="flex items-center justify-center">
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Submitting...
+                                </span>
+                            ) : (
+                                <span className="flex items-center justify-center">
+                                    <CirclePlus className="w-5 h-5 mr-2" />
+                                    Report Item
+                                </span>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </form>
 

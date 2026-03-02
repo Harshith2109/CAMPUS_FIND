@@ -4,6 +4,7 @@ import { login as loginService, resendOtp } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
 
 import PasswordField from '../components/PasswordField';
+import FormField from '../components/FormField';
 import toast from '../utils/toast';
 
 const Login = () => {
@@ -71,27 +72,27 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-bg-main py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full">
-                <div className="bg-white rounded-2xl shadow-xl p-8">
+                <div className="bg-bg-surface rounded-2xl shadow-xl p-8 border border-border-main">
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-brand-primary to-brand-primary-hover rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <span className="text-white font-bold text-2xl">CF</span>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-                        <p className="text-gray-600 mt-2">Sign in to your CampusFind account</p>
+                        <h2 className="text-3xl font-bold text-text-main">Welcome Back</h2>
+                        <p className="text-text-muted mt-2">Sign in to your CampusFind account</p>
                     </div>
 
                     {/* Error Message */}
                     {error && (
-                        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-medium">
+                        <div className="mb-4 p-4 bg-brand-danger/10 border border-brand-danger/20 text-brand-danger rounded-lg text-sm font-medium">
                             {error}
                             {unverifiedEmail && (
                                 <button
                                     onClick={handleResendVerificationEmail}
                                     disabled={loading}
-                                    className="block mt-2 text-primary-600 hover:text-primary-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="block mt-2 text-brand-primary hover:text-brand-primary-hover font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Resend Verification Code
                                 </button>
@@ -101,10 +102,7 @@ const Login = () => {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                RVCE Email Address
-                            </label>
+                        <FormField label="RVCE Email Address" required>
                             <input
                                 id="email"
                                 name="email"
@@ -115,7 +113,7 @@ const Login = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                             />
-                        </div>
+                        </FormField>
 
                         <div>
                             <PasswordField
@@ -128,7 +126,7 @@ const Login = () => {
                                 autoComplete="current-password"
                             />
                             <div className="text-right mt-2">
-                                <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                                <Link to="/forgot-password" className="text-sm text-brand-primary hover:text-brand-primary-hover font-medium">
                                     Forgot Password?
                                 </Link>
                             </div>
@@ -146,9 +144,9 @@ const Login = () => {
 
                     {/* Footer */}
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-text-muted">
                             Don't have an account?{' '}
-                            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+                            <Link to="/register" className="text-brand-primary hover:text-brand-primary-hover font-medium">
                                 Register here
                             </Link>
                         </p>

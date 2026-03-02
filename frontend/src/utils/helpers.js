@@ -72,11 +72,11 @@ export const getStatusColor = (status) => {
  */
 export const getMatchQualityColor = (quality) => {
     const colors = {
-        High: 'text-success-600 bg-success-100',
-        Medium: 'text-warning-600 bg-warning-100',
-        Low: 'text-gray-600 bg-gray-100'
+        High: 'text-brand-success bg-brand-success/10 border border-brand-success/20',
+        Medium: 'text-brand-warning bg-brand-warning/10 border border-brand-warning/20',
+        Low: 'text-text-muted bg-bg-main border border-border-main'
     };
-    return colors[quality] || 'text-gray-600 bg-gray-100';
+    return colors[quality] || 'text-text-muted bg-bg-main';
 };
 
 /**
@@ -91,7 +91,8 @@ export const isValidEmail = (email) => {
  * Get image URL
  */
 export const getImageUrl = (imagePath) => {
-    const placeholder = 'https://placehold.co/600x400/f3f4f6/f3f4f6';
+    // Return a transparent 1x1 GIF placeholder so the container's themed background shows through
+    const placeholder = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     if (!imagePath) return placeholder;
     if (imagePath.startsWith('http')) return imagePath;
 

@@ -4,6 +4,7 @@ import { getMyItems, deleteItem } from '../services/itemService';
 import ItemCard from '../components/ItemCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from '../utils/toast';
+import { PackageX } from 'lucide-react';
 
 const MyItems = () => {
     const [items, setItems] = useState([]);
@@ -53,66 +54,47 @@ const MyItems = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">My Items</h1>
-                <p className="text-gray-600 mt-2">Manage your reported items</p>
+                <h1 className="text-3xl font-bold text-text-main">My Items</h1>
+                <p className="text-text-muted mt-2">Manage your reported items</p>
             </div>
 
             {/* Filter Tabs */}
-            <div className="mb-6 flex gap-2 border-b">
-                <button
-                    onClick={() => setFilter('all')}
-                    className={`px-4 py-2 font-medium transition-colors ${filter === 'all'
-                        ? 'text-primary-600 border-b-2 border-primary-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                >
-                    All ({items.length})
-                </button>
-                <button
-                    onClick={() => setFilter('active')}
-                    className={`px-4 py-2 font-medium transition-colors ${filter === 'active'
-                        ? 'text-primary-600 border-b-2 border-primary-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                >
-                    Active ({items.filter(i => i.status === 'active').length})
-                </button>
-                <button
-                    onClick={() => setFilter('claimed')}
-                    className={`px-4 py-2 font-medium transition-colors ${filter === 'claimed'
-                        ? 'text-primary-600 border-b-2 border-primary-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                >
-                    Claimed ({items.filter(i => i.status === 'claimed').length})
-                </button>
-                <button
-                    onClick={() => setFilter('resolved')}
-                    className={`px-4 py-2 font-medium transition-colors ${filter === 'resolved'
-                        ? 'text-primary-600 border-b-2 border-primary-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                >
-                    Resolved ({items.filter(i => i.status === 'resolved').length})
-                </button>
+            <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+                {[
+                    { id: 'all', label: 'All', count: items.length },
+                    { id: 'active', label: 'Active', count: items.filter(i => i.status === 'active').length },
+                    { id: 'claimed', label: 'Claimed', count: items.filter(i => i.status === 'claimed').length },
+                    { id: 'resolved', label: 'Resolved', count: items.filter(i => i.status === 'resolved').length }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setFilter(tab.id)}
+                        className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 whitespace-nowrap shadow-sm border ${filter === tab.id
+                            ? 'bg-brand-primary text-white border-brand-primary shadow-brand-primary/20'
+                            : 'bg-bg-surface text-text-muted border-border-main hover:border-brand-primary/50 hover:text-text-main'
+                            }`}
+                    >
+                        {tab.label} <span className={`ml-1.5 text-xs opacity-80 ${filter === tab.id ? 'text-white' : 'text-text-muted'}`}>({tab.count})</span>
+                    </button>
+                ))}
             </div>
 
             {/* Items Grid */}
             {filteredItems.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredItems.map(item => (
-                        <div key={item._id} className="relative">
+                        <div key={item._id} className="relative group">
                             <ItemCard item={item} />
-                            <div className="mt-2 flex gap-2">
+                            <div className="mt-3 flex gap-2">
                                 <Link
                                     to={`/items/${item._id}`}
-                                    className="btn btn-secondary flex-1 text-sm"
+                                    className="btn btn-secondary flex-1 text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     View Details
                                 </Link>
                                 <button
                                     onClick={() => handleDelete(item._id)}
-                                    className="btn btn-danger flex-1 text-sm"
+                                    className="btn btn-danger flex-1 text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Delete
                                 </button>
@@ -121,14 +103,14 @@ const MyItems = () => {
                     ))}
                 </div>
             ) : (
-                <div className="card text-center py-12">
-                    <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                    <p className="text-gray-600 mb-4">
+                <div className="card bg-bg-surface border border-border-main text-center py-20 rounded-2xl shadow-sm">
+                    <div className="w-20 h-20 bg-bg-main rounded-full flex items-center justify-center mx-auto mb-6">
+                        <PackageX className="w-10 h-10 text-text-muted" />
+                    </div>
+                    <p className="text-text-muted text-lg font-medium mb-6">
                         {filter === 'all' ? 'No items found' : `No ${filter} items`}
                     </p>
-                    <Link to="/report-item" className="btn btn-primary">
+                    <Link to="/report-item" className="btn btn-primary px-8">
                         Report an Item
                     </Link>
                 </div>
