@@ -2,6 +2,7 @@ const User = require('../models/User');
 const TemporaryUser = require('../models/TemporaryUser');
 const emailService = require('../services/emailService');
 const otpService = require('../services/otpService');
+const SystemSettings = require('../models/SystemSettings');
 const fs = require('fs');
 const path = require('path');
 
@@ -12,6 +13,15 @@ const path = require('path');
  */
 exports.register = async (req, res, next) => {
     try {
+        // Check if registration is allowed
+        const settings = await SystemSettings.getSettings();
+        if (!settings.allowRegistration) {
+            return res.status(403).json({
+                success: false,
+                message: 'Self-registration is currently disabled. Please contact an administrator to create an account.'
+            });
+        }
+
         const { name, email, password, phone, department, role } = req.body;
 
         // Strong password regex
@@ -116,7 +126,6 @@ exports.verifyOtp = async (req, res, next) => {
                 phone: tempUser.phone,
                 department: tempUser.department,
                 role: tempUser.role,
-                isEmailVerified: true,
                 verified: true
             });
 
@@ -134,7 +143,6 @@ exports.verifyOtp = async (req, res, next) => {
             }
 
             // Update existing user
-            user.isEmailVerified = true;
             user.verified = true;
             await user.save();
         }
@@ -266,7 +274,7 @@ exports.login = async (req, res, next) => {
         }
 
         // Check if email is verified
-        if (!user.isEmailVerified) {
+        if (!user.verified) {
             return res.status(403).json({
                 success: false,
                 message: 'Please verify your email first',

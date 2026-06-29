@@ -137,8 +137,8 @@ const ItemList = () => {
                             onChange={(e) => handleFilterChange('status', e.target.value)}
                             className="input"
                         >
-                            <option value="">All Status</option>
-                            <option value="available">Available</option>
+                            <option value="">Available</option>
+                            <option value="active">Active</option>
                             <option value="claimed">Claimed</option>
                             <option value="returned">Returned</option>
                         </select>

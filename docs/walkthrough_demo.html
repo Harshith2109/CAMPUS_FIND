@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusFind — Component Walkthrough</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #334155;
+            --border: #475569;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --accent: #6366f1;
+            --accent2: #818cf8;
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --cyan: #22d3ee
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden
+        }
+
+        a {
+            color: var(--accent2);
+            text-decoration: none
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(15, 23, 42, .95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--surface2);
+            padding: 2rem 1.25rem;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform .3s
+        }
+
+        .sidebar .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .55rem .85rem;
+            border-radius: 8px;
+            color: var(--text2);
+            font-size: .85rem;
+            font-weight: 500;
+            transition: all .2s;
+            margin-bottom: 2px
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: var(--surface);
+            color: var(--accent2)
+        }
+
+        .sidebar nav a .num {
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, .15);
+            border-radius: 6px
+        }
+
+        /* Main */
+        .main {
+            margin-left: 280px;
+            padding: 3rem 3rem 6rem
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto
+        }
+
+        /* Header */
+        .hero {
+            text-align: center;
+            padding: 4rem 0 3rem
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: .75rem
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text2);
+            max-width: 600px;
+            margin: 0 auto 1.5rem
+        }
+
+        .badge-row {
+            display: flex;
+            gap: .75rem;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+
+        .badge {
+            padding: .35rem .9rem;
+            border-radius: 20px;
+            font-size: .78rem;
+            font-weight: 600
+        }
+
+        .badge-purple {
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent2);
+            border: 1px solid rgba(99, 102, 241, .3)
+        }
+
+        .badge-green {
+            background: rgba(34, 197, 94, .12);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, .3)
+        }
+
+        .badge-cyan {
+            background: rgba(34, 211, 238, .12);
+            color: var(--cyan);
+            border: 1px solid rgba(34, 211, 238, .3)
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 3rem;
+            animation: fadeUp .5s ease both
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        section h2 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding-bottom: .6rem;
+            border-bottom: 2px solid var(--surface2)
+        }
+
+        section h2 .emoji {
+            font-size: 1.5rem
+        }
+
+        section h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 1.5rem 0 .75rem
+        }
+
+        section p {
+            color: var(--text2);
+            margin-bottom: 1rem
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--surface2);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: border-color .25s
+        }
+
+        .card:hover {
+            border-color: var(--accent)
+        }
+
+        /* Code */
+        pre {
+            border-radius: 10px !important;
+            margin: 0 !important;
+            font-size: .82rem !important
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace !important
+        }
+
+        .code-label {
+            display: inline-block;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--cyan);
+            background: rgba(34, 211, 238, .1);
+            padding: 2px 10px;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: -4px
+        }
+
+        /* Callout */
+        .callout {
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            margin: 1rem 0 1.5rem;
+            border-left: 4px solid
+        }
+
+        .callout-blue {
+            background: rgba(99, 102, 241, .08);
+            border-color: var(--accent)
+        }
+
+        .callout-green {
+            background: rgba(34, 197, 94, .08);
+            border-color: var(--green)
+        }
+
+        .callout h4 {
+            font-weight: 700;
+            margin-bottom: .4rem;
+            font-size: .9rem
+        }
+
+        .callout ul {
+            padding-left: 1.25rem;
+            color: var(--text2);
+            font-size: .9rem
+        }
+
+        .callout li {
+            margin-bottom: .25rem
+        }
+
+        /* Table */
+        .tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem;
+            margin: .75rem 0
+        }
+
+        .tbl th {
+            text-align: left;
+            padding: .6rem .8rem;
+            background: var(--surface2);
+            color: var(--text);
+            font-weight: 600;
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .tbl td {
+            padding: .55rem .8rem;
+            border-bottom: 1px solid var(--surface2);
+            color: var(--text2)
+        }
+
+        .tbl tr:hover td {
+            background: rgba(99, 102, 241, .04)
+        }
+
+        .tbl code {
+            font-size: .78rem;
+            background: rgba(99, 102, 241, .12);
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: var(--accent2)
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 1.5rem 0
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--surface2)
+        }
+
+        .tl-item {
+            position: relative;
+            margin-bottom: 1.5rem
+        }
+
+        .tl-dot {
+            position: absolute;
+            left: -1.65rem;
+            top: 4px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid var(--bg)
+        }
+
+        .tl-item h4 {
+            font-weight: 700;
+            font-size: .95rem;
+            margin-bottom: .2rem
+        }
+
+        .tl-item p {
+            color: var(--text2);
+            font-size: .88rem
+        }
+
+        /* Flow diagram replacement */
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0
+        }
+
+        .flow-box {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            background: var(--surface);
+            border: 1px solid var(--surface2);
+            font-size: .82rem;
+            font-weight: 600;
+            transition: transform .2s
+        }
+
+        .flow-box:hover {
+            transform: translateY(-3px)
+        }
+
+        .flow-box .icon {
+            font-size: 1.5rem;
+            margin-bottom: .4rem
+        }
+
+        .flow-box .sub {
+            font-size: .72rem;
+            color: var(--text2);
+            font-weight: 400;
+            margin-top: .25rem
+        }
+
+        /* Print */
+        .btn-print {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            color: #fff;
+            border: none;
+            padding: .75rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: .85rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, .4);
+            z-index: 200;
+            transition: transform .2s
+        }
+
+        .btn-print:hover {
+            transform: scale(1.05)
+        }
+
+        @media print {
+
+            .sidebar,
+            .btn-print {
+                display: none !important
+            }
+
+            .main {
+                margin-left: 0
+            }
+
+            body {
+                background: #fff;
+                color: #111
+            }
+
+            .card {
+                border: 1px solid #ddd;
+                break-inside: avoid
+            }
+        }
+
+        /* Mermaid Diagrams */
+        .diagram-card {
+            background: var(--surface);
+            border: 1px solid var(--surface2);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            transition: border-color .25s
+        }
+
+        .diagram-card:hover {
+            border-color: var(--accent)
+        }
+
+        .diagram-title {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .diagram-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            display: inline-block
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            background: transparent !important
+        }
+
+        .mermaid svg {
+            max-width: 100%
+        }
+
+        /* Mobile */
+        .menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 200;
+            background: var(--surface);
+            border: 1px solid var(--surface2);
+            color: var(--text);
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            cursor: pointer
+        }
+
+        @media(max-width:768px) {
+            .sidebar {
+                transform: translateX(-100%)
+            }
+
+            .sidebar.open {
+                transform: none
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 1.5rem
+            }
+
+            .hero h1 {
+                font-size: 2.2rem
+            }
+
+            .menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+    <aside class="sidebar">
+        <div class="logo">CampusFind</div>
+        <nav>
+            <a href="#architecture"><span class="num">🏗</span>Architecture</a>
+            <a href="#app-jsx"><span class="num">1</span>Entry Point</a>
+            <a href="#context"><span class="num">2</span>Context Providers</a>
+            <a href="#api"><span class="num">3</span>API Layer</a>
+            <a href="#services"><span class="num">4</span>Service Files</a>
+            <a href="#components"><span class="num">5</span>UI Components</a>
+            <a href="#pages"><span class="num">6</span>Key Pages</a>
+            <a href="#models"><span class="num">7</span>Data Models</a>
+            <a href="#server"><span class="num">8</span>Server &amp; Middleware</a>
+            <a href="#lifecycle"><span class="num">9</span>Data Lifecycle</a>
+            <a href="#diagram"><span class="num">10</span>Summary Diagram</a>
+        </nav>
+    </aside>
+
+    <div class="main">
+        <div class="container">
+
+            <!-- HERO -->
+            <header class="hero">
+                <h1>CampusFind</h1>
+                <p>A comprehensive deep-dive into every layer of the project — from the React frontend to the Node.js
+                    backend and MongoDB data models.</p>
+                <div class="badge-row">
+                    <span class="badge badge-purple">Technical Walkthrough</span>
+                    <span class="badge badge-green">Full Stack</span>
+                    <span class="badge badge-cyan">v1.0</span>
+                </div>
+            </header>
+
+            <!-- ARCHITECTURE -->
+            <section id="architecture">
+                <h2><span class="emoji">🏗️</span> Architecture Overview</h2>
+                <div class="card">
+                    <span class="code-label">Project Structure</span>
+                    <pre><code class="language-text">CampusFind/
+├── frontend/                      ← React + Vite + TailwindCSS SPA
+│   └── src/
+│       ├── App.jsx                ← Root: routing & providers
+│       ├── main.jsx               ← Entry point
+│       ├── context/               ← Global state (Auth, Theme)
+│       ├── hooks/                 ← Custom React hooks
+│       ├── components/            ← Reusable UI components (15)
+│       ├── pages/                 ← Full-page views (18)
+│       ├── services/              ← API call functions (6)
+│       └── utils/                 ← Helpers (date, image, etc.)
+└── backend/                       ← Node.js + Express REST API
+    ├── server.js                  ← Entry point, middleware setup
+    ├── models/                    ← MongoDB/Mongoose schemas (7)
+    ├── controllers/               ← Business logic handlers
+    ├── routes/                    ← API endpoint definitions (5)
+    ├── middleware/                ← Auth, errors, maintenance
+    └── services/                  ← Business services (email, matching)</code></pre>
+                </div>
+                <div class="diagram-card">
+                    <div class="diagram-title">System Architecture Flow</div>
+                    <div class="mermaid">
+                        graph LR
+                        A["🌐 Browser<br />React SPA"] -->|"Axios + JWT"| B["⚙️ Express API<br />:5000"]
+                        B --> C{"🛡️ Middleware"}
+                        C -->|"validateToken"| D["📦 Controllers"]
+                        C -->|"maintenanceMode"| E["🚧 /maintenance"]
+                        D --> F["🗄️ MongoDB"]
+                        F --> G[("Users")]
+                        F --> H[("Items")]
+                        F --> I[("Claims")]
+                        F --> J[("Notifications")]
+                        D -->|"Multer"| K["📁 /uploads"]
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. APP.JSX -->
+            <section id="app-jsx">
+                <h2><span class="emoji">⚡</span> 1. Entry Point: <code>App.jsx</code></h2>
+                <p>The root component that orchestrates global state providers and routing for the entire application.
+                </p>
+                <div class="card">
+                    <span class="code-label">App.jsx</span>
+                    <pre><code class="language-jsx">function App() {
+  return (
+    &lt;ThemeProvider&gt;           {/* 1. Dark/Light mode context */}
+      &lt;QueryClientProvider&gt;  {/* 2. React Query (data fetching) */}
+        &lt;AuthProvider&gt;       {/* 3. Auth context (logged-in user) */}
+          &lt;Router&gt;           {/* 4. Browser routing */}
+            &lt;Toaster /&gt;      {/* 5. Global toast notifications */}
+            &lt;Navbar /&gt;       {/* 6. Persistent top navbar */}
+            &lt;Routes&gt;
+              {/* Public routes */}
+              &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+              &lt;Route path="/items" element={&lt;ItemList /&gt;} /&gt;
+
+              {/* Protected routes (login required) */}
+              &lt;Route path="/dashboard" element={
+                &lt;ProtectedRoute&gt;&lt;Dashboard /&gt;&lt;/ProtectedRoute&gt;
+              } /&gt;
+
+              {/* Role-restricted routes */}
+              &lt;Route path="/verify-claims" element={
+                &lt;ProtectedRoute requiredRole={['staff', 'admin']}&gt;
+                  &lt;VerifyClaims /&gt;
+                &lt;/ProtectedRoute&gt;
+              } /&gt;
+              &lt;Route path="/admin" element={
+                &lt;ProtectedRoute requiredRole="admin"&gt;
+                  &lt;AdminDashboard /&gt;
+                &lt;/ProtectedRoute&gt;
+              } /&gt;
+            &lt;/Routes&gt;
+          &lt;/Router&gt;
+        &lt;/AuthProvider&gt;
+      &lt;/QueryClientProvider&gt;
+    &lt;/ThemeProvider&gt;
+  );
+}</code></pre>
+                </div>
+                <div class="callout callout-blue">
+                    <h4>🔑 Key Mechanisms</h4>
+                    <ul>
+                        <li><strong>Maintenance Heartbeat:</strong> Pings <code>/api/health</code> on mount to detect
+                            server status.</li>
+                        <li><strong>Provider Nesting:</strong> ThemeProvider → QueryClientProvider → AuthProvider
+                            ensures global state is available everywhere.</li>
+                        <li><strong>Route Protection:</strong> <code>ProtectedRoute</code> redirects unauthenticated
+                            users to <code>/login</code>.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 2. CONTEXT -->
+            <section id="context">
+                <h2><span class="emoji">🧠</span> 2. Context Providers</h2>
+                <h3>AuthContext.jsx</h3>
+                <p>Manages the global logged-in user state, persisting sessions via localStorage.</p>
+                <div class="card">
+                    <span class="code-label">context/AuthContext.jsx</span>
+                    <pre><code class="language-jsx">export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            setUser(getCurrentUser()); // Restore from localStorage
+        }
+        setLoading(false);
+    }, []);
+
+    const login = (userData) => setUser(userData);
+    const logout = () => {
+        setUser(null);
+        authLogout(); // Clears storage + redirects
+    };
+    const updateUser = (userData) => {
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+    };
+
+    return &lt;AuthContext.Provider value={{ user, login, logout, updateUser, loading }}&gt;
+        {children}
+    &lt;/AuthContext.Provider&gt;;
+};</code></pre>
+                </div>
+                <h3>ThemeContext.jsx</h3>
+                <p>Handles dark/light mode switching with system preference detection.</p>
+                <div class="card">
+                    <span class="code-label">context/ThemeContext.jsx</span>
+                    <pre><code class="language-jsx">export const ThemeProvider = ({ children }) => {
+    const [theme, setTheme] = useState(() => {
+        const saved = localStorage.getItem('theme');
+        if (saved) return saved;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark' : 'light';
+    });
+
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => setTheme(p => p === 'light' ? 'dark' : 'light');
+
+    return &lt;ThemeContext.Provider value={{ theme, toggleTheme }}&gt;
+        {children}
+    &lt;/ThemeContext.Provider&gt;;
+};</code></pre>
+                </div>
+                <div class="diagram-card">
+                    <div class="diagram-title">Authentication Flow</div>
+                    <div class="mermaid">
+                        sequenceDiagram
+                        participant U as User
+                        participant F as Frontend
+                        participant A as Auth API
+                        participant D as Database
+                        participant E as Email Service
+                        U->>F: Fill registration form
+                        F->>A: POST /auth/register
+                        A->>D: Save user (unverified)
+                        A->>E: Send OTP email
+                        E-->>U: OTP in email inbox
+                        U->>F: Enter OTP code
+                        F->>A: POST /auth/verify-otp
+                        A->>D: Mark user verified
+                        A-->>F: JWT Token + User data
+                        F->>F: Store in localStorage
+                        Note over F: User is now logged in
+                        U->>F: Login next time
+                        F->>A: POST /auth/login
+                        A->>D: Verify credentials
+                        A-->>F: JWT Token + User data
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. API -->
+            <section id="api">
+                <h2><span class="emoji">🔌</span> 3. API Layer: <code>api.js</code></h2>
+                <p>A single Axios instance used by every service — with automatic JWT attachment and global error
+                    handling.</p>
+                <div class="card">
+                    <span class="code-label">services/api.js</span>
+                    <pre><code class="language-javascript">const api = axios.create({ baseURL: 'http://localhost:5000/api' });
+
+// REQUEST: Auto-attach JWT token
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+});
+
+// RESPONSE: Handle global errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login'; // Expired session
+        }
+        if (error.response?.status === 503 && error.response.data.isMaintenance) {
+            if (user.role !== 'admin') window.location.href = '/maintenance';
+        }
+        return Promise.reject(error);
+    }
+);</code></pre>
+                </div>
+                <div class="callout callout-green">
+                    <h4>✅ Why This Matters</h4>
+                    <ul>
+                        <li>You never manually add <code>Authorization</code> headers in components.</li>
+                        <li>Expired sessions are automatically handled app-wide.</li>
+                    </ul>
+                </div>
+                <div class="diagram-card">
+                    <div class="diagram-title">API Request Lifecycle</div>
+                    <div class="mermaid">
+                        flowchart LR
+                        A["Component"] -->|"calls"| B["Service Function<br />e.g. getItems()"]
+                        B -->|"uses"| C["Axios Instance"]
+                        C -->|"Request<br />Interceptor"| D{"Has Token?"}
+                        D -->|"Yes"| E["Attach Bearer<br />Header"]
+                        D -->|"No"| F["Send as-is"]
+                        E --> G["Express Server"]
+                        F --> G
+                        G -->|"Success"| H["Response Data"]
+                        G -->|"401"| I["Clear Token<br />→ /login"]
+                        G -->|"503"| J["Maintenance<br />→ /maintenance"]
+                        H --> B
+                        B --> A
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. SERVICES -->
+            <section id="services">
+                <h2><span class="emoji">📡</span> 4. Service Files</h2>
+                <p>These functions are the only place API calls happen. Components never call <code>axios</code>
+                    directly.</p>
+
+                <h3>authService.js</h3>
+                <div class="card" style="overflow-x:auto">
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>API Call</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>register()</code></td>
+                                <td>POST /auth/register</td>
+                                <td>Create account, trigger OTP email</td>
+                            </tr>
+                            <tr>
+                                <td><code>verifyOtp()</code></td>
+                                <td>POST /auth/verify-otp</td>
+                                <td>Confirm OTP, receive JWT</td>
+                            </tr>
+                            <tr>
+                                <td><code>login()</code></td>
+                                <td>POST /auth/login</td>
+                                <td>Log in, store token + user</td>
+                            </tr>
+                            <tr>
+                                <td><code>logout()</code></td>
+                                <td>—</td>
+                                <td>Clear localStorage, redirect</td>
+                            </tr>
+                            <tr>
+                                <td><code>forgotPassword()</code></td>
+                                <td>POST /auth/forgot-password</td>
+                                <td>Send OTP for reset</td>
+                            </tr>
+                            <tr>
+                                <td><code>updateProfile()</code></td>
+                                <td>PUT /auth/profile</td>
+                                <td>Update name, phone, dept</td>
+                            </tr>
+                            <tr>
+                                <td><code>changePassword()</code></td>
+                                <td>PUT /auth/change-password</td>
+                                <td>Change password</td>
+                            </tr>
+                            <tr>
+                                <td><code>deleteAccount()</code></td>
+                                <td>DELETE /auth/me</td>
+                                <td>Delete after OTP confirm</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>itemService.js</h3>
+                <div class="card" style="overflow-x:auto">
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>API Call</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>getItems(filters)</code></td>
+                                <td>GET /items?type=…</td>
+                                <td>Filtered item list</td>
+                            </tr>
+                            <tr>
+                                <td><code>getItemById(id)</code></td>
+                                <td>GET /items/:id</td>
+                                <td>Single item detail</td>
+                            </tr>
+                            <tr>
+                                <td><code>createItem(data)</code></td>
+                                <td>POST /items</td>
+                                <td>Report item (multipart)</td>
+                            </tr>
+                            <tr>
+                                <td><code>updateItem(id)</code></td>
+                                <td>PUT /items/:id</td>
+                                <td>Edit existing item</td>
+                            </tr>
+                            <tr>
+                                <td><code>deleteItem(id)</code></td>
+                                <td>DELETE /items/:id</td>
+                                <td>Remove item</td>
+                            </tr>
+                            <tr>
+                                <td><code>getMyItems()</code></td>
+                                <td>GET /items/user/my-items</td>
+                                <td>Current user's items</td>
+                            </tr>
+                            <tr>
+                                <td><code>getMatches(id)</code></td>
+                                <td>GET /items/:id/matches</td>
+                                <td>Potential matches</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>claimService.js</h3>
+                <div class="card" style="overflow-x:auto">
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>API Call</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>createClaim()</code></td>
+                                <td>POST /claims</td>
+                                <td>Submit claim with proof</td>
+                            </tr>
+                            <tr>
+                                <td><code>getClaims(filters)</code></td>
+                                <td>GET /claims?status=…</td>
+                                <td>Filtered claims list</td>
+                            </tr>
+                            <tr>
+                                <td><code>getMyClaims()</code></td>
+                                <td>GET /claims/user/my-claims</td>
+                                <td>User's own claims</td>
+                            </tr>
+                            <tr>
+                                <td><code>updateClaimStatus()</code></td>
+                                <td>PATCH /claims/:id</td>
+                                <td>Approve/reject (staff)</td>
+                            </tr>
+                            <tr>
+                                <td><code>deleteClaim(id)</code></td>
+                                <td>DELETE /claims/:id</td>
+                                <td>Withdraw claim</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <span class="code-label">Image Upload Example</span>
+                    <pre><code class="language-javascript">export const createItem = async (itemData) => {
+    const formData = new FormData();
+    Object.keys(itemData).forEach(key => {
+        if (key !== 'images') formData.append(key, itemData[key]);
+    });
+    itemData.images?.forEach(image => formData.append('images', image));
+    return await api.post('/items', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+};</code></pre>
+                </div>
+            </section>
+
+            <!-- 5. COMPONENTS -->
+            <section id="components">
+                <h2><span class="emoji">🧩</span> 5. Reusable UI Components</h2>
+
+                <h3>ProtectedRoute.jsx</h3>
+                <p>A route guard wrapping pages that need login or a specific role.</p>
+                <div class="card">
+                    <pre><code class="language-jsx">const ProtectedRoute = ({ children, requiredRole }) => {
+    const { user, loading } = useAuth();
+    if (loading) return &lt;LoadingSpinner /&gt;;
+    if (!user) return &lt;Navigate to="/login" /&gt;;
+    if (requiredRole) {
+        const allowed = Array.isArray(requiredRole)
+          ? requiredRole : [requiredRole];
+        if (user.role !== 'admin' && !allowed.includes(user.role)) {
+            return &lt;Navigate to="/dashboard" /&gt;;
+        }
+    }
+    return children;
+};</code></pre>
+                </div>
+
+                <h3>Navbar.jsx — Persistent Navigation with Live Notifications</h3>
+                <p>The top navigation bar is always visible. It adapts its links based on the user's role and polls for
+                    unread notifications every 30 seconds.</p>
+                <div class="card">
+                    <span class="code-label">components/Navbar.jsx</span>
+                    <pre><code class="language-jsx">const Navbar = () => {
+    const { user, logout } = useAuth();
+    const { pathname } = useLocation();       // current URL path
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    // Poll for unread notifications every 30 seconds
+    useEffect(() => {
+        if (!user) return;
+        const fetchCount = async () => {
+            const data = await getUnreadCount();
+            setUnreadCount(data.count);
+        };
+        fetchCount();
+        const interval = setInterval(fetchCount, 30000); // re-check every 30s
+        return () => clearInterval(interval);             // cleanup on unmount
+    }, [user]);
+
+    // Highlight the active page link
+    const isActive = (path) => pathname === path;
+
+    return (
+        &lt;nav className="sticky top-0 z-50"&gt;
+            &lt;Link to="/"&gt;Campus&lt;span&gt;Find&lt;/span&gt;&lt;/Link&gt;
+
+            {user ? (
+                &lt;&gt;
+                    {/* Role-conditional navigation links */}
+                    &lt;Link to="/dashboard"
+                          className={isActive('/dashboard') ? 'active' : ''}&gt;
+                        Dashboard
+                    &lt;/Link&gt;
+                    {(user.role === 'staff' || user.role === 'admin') && (
+                        &lt;Link to="/verify-claims"&gt;Verify Claims&lt;/Link&gt;
+                    )}
+                    {user.role === 'admin' && (
+                        &lt;Link to="/admin"&gt;Admin&lt;/Link&gt;
+                    )}
+
+                    {/* Notification bell with live unread count */}
+                    &lt;Link to="/notifications"&gt;
+                        &lt;Bell /&gt;
+                        {unreadCount > 0 && &lt;span&gt;{unreadCount}&lt;/span&gt;}
+                    &lt;/Link&gt;
+
+                    &lt;button onClick={logout}&gt;Logout&lt;/button&gt;
+                &lt;/&gt;
+            ) : (
+                &lt;&gt;
+                    &lt;Link to="/login"&gt;Login&lt;/Link&gt;
+                    &lt;Link to="/register"&gt;Register&lt;/Link&gt;
+                &lt;/&gt;
+            )}
+        &lt;/nav&gt;
+    );
+};</code></pre>
+                </div>
+                <div class="callout callout-blue">
+                    <h4>🔍 How It Works</h4>
+                    <ul>
+                        <li><strong>Role-aware links:</strong> Staff see "Verify Claims". Admins see both "Verify
+                            Claims" and "Admin".</li>
+                        <li><strong>Active highlighting:</strong> <code>isActive()</code> compares the current URL path
+                            to style the active link.</li>
+                        <li><strong>Live badge:</strong> <code>setInterval</code> polls <code>getUnreadCount()</code>
+                            every 30s so the bell icon shows a live count.</li>
+                        <li><strong>Sticky positioning:</strong> The navbar stays at the top as the user scrolls.</li>
+                    </ul>
+                </div>
+
+                <h3>ItemCard.jsx — Visual Building Block for Item Lists</h3>
+                <p>Every item grid (Dashboard, Browse, My Items) uses this card. It renders the image, a color-coded
+                    type badge (red/green), match count, and all metadata.</p>
+                <div class="card">
+                    <span class="code-label">components/ItemCard.jsx</span>
+                    <pre><code class="language-jsx">const ItemCard = ({ item, plain = false }) => {
+    return (
+        &lt;Link to={`/items/${item._id}`}&gt;
+            &lt;div className="card"&gt;
+                &lt;div className="relative h-48"&gt;
+                    &lt;img src={getImageUrl(item.images?.[0])} alt={item.title} /&gt;
+                    {/* Red badge = Lost, Green badge = Found */}
+                    &lt;div className={item.type === 'lost'
+                      ? 'bg-brand-danger' : 'bg-brand-success'}&gt;
+                        {item.type === 'lost' ? 'Lost' : 'Found'}
+                    &lt;/div&gt;
+                    {/* Show how many potential matches exist */}
+                    {item.matchedItems?.length > 0 && (
+                        &lt;div className="badge"&gt;
+                            {item.matchedItems.length} Match(es)
+                        &lt;/div&gt;
+                    )}
+                &lt;/div&gt;
+                &lt;h3&gt;{item.title}&lt;/h3&gt;
+                &lt;p&gt;{truncateText(item.description, 100)}&lt;/p&gt;
+                {/* Category, Location, Date metadata */}
+                &lt;Tag /&gt;{item.category}
+                &lt;MapPin /&gt;{item.location}
+                &lt;Calendar /&gt;{formatDate(item.date)}
+                {/* Status: active, claimed, returned, archived */}
+                &lt;span className={getStatusColor(item.status)}&gt;
+                    {item.status}
+                &lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/Link&gt;
+    );
+};</code></pre>
+                </div>
+                <div class="callout callout-green">
+                    <h4>💡 Design Detail</h4>
+                    <ul>
+                        <li>The <code>plain</code> prop removes the <code>Link</code> wrapper and card styling — used
+                            when the item is displayed inside another panel (e.g., claim detail view).</li>
+                        <li><code>getImageUrl()</code> constructs the full URL for the image from the server's
+                            <code>/uploads</code> path.
+                        </li>
+                        <li><code>truncateText()</code> clips long descriptions to 100 characters with an ellipsis.</li>
+                    </ul>
+                </div>
+
+                <h3>StatCard.jsx — Dashboard Metric Block</h3>
+                <p>Renders a single stat with a label, value, and colored icon used on both Dashboard and Admin pages.
+                </p>
+                <div class="card">
+                    <span class="code-label">components/StatCard.jsx</span>
+                    <pre><code class="language-jsx">const StatCard = ({ label, value, icon, color = 'primary' }) => {
+    const colors = {
+        primary: 'bg-brand-primary/10',    // soft blue background
+        success: 'bg-brand-success/10',    // soft green
+        warning: 'bg-brand-warning/10',    // soft orange
+    };
+    return (
+        &lt;div className={`stat-card ${colors[color]}`}&gt;
+            &lt;p className="stat-label"&gt;{label}&lt;/p&gt;
+            &lt;p className="stat-value"&gt;{value}&lt;/p&gt;
+            &lt;div className={`icon text-brand-${color}`}&gt;{icon}&lt;/div&gt;
+        &lt;/div&gt;
+    );
+};</code></pre>
+                </div>
+
+                <h3>ActionCard.jsx — Gradient Call-to-Action</h3>
+                <p>Large, gradient cards used for Dashboard quick actions ("Report an Item", "Browse Items"). Wrapped in
+                    a <code>&lt;Link&gt;</code> by the parent component.</p>
+                <div class="card">
+                    <span class="code-label">components/ActionCard.jsx</span>
+                    <pre><code class="language-jsx">const ActionCard = ({ icon, title, description, color = 'primary' }) => {
+    const gradients = {
+        primary: 'from-brand-primary to-brand-primary-hover',
+        success: 'from-brand-success to-green-600',
+    };
+    return (
+        &lt;div className={`card-interactive bg-gradient-to-br
+            ${gradients[color]} text-white`}&gt;
+            {icon}
+            &lt;h3&gt;{title}&lt;/h3&gt;
+            &lt;p&gt;{description}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+};</code></pre>
+                </div>
+
+                <h3>Modal.jsx — Reusable Dialog Overlay</h3>
+                <p>Used across the app for confirmations, image viewing, and claim details. Supports different sizes and
+                    an optional footer for action buttons.</p>
+                <div class="card">
+                    <span class="code-label">components/Modal.jsx</span>
+                    <pre><code class="language-jsx">const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }) => {
+    if (!isOpen) return null; // Render nothing when closed
+
+    return (
+        &lt;div className="fixed inset-0 z-50"&gt;
+            {/* Semi-transparent backdrop — click to close */}
+            &lt;div className="fixed inset-0 bg-black/50" onClick={onClose} /&gt;
+            &lt;div className={`modal-box ${sizeClasses[size]}`}&gt;
+                &lt;h2&gt;{title}&lt;/h2&gt;
+                &lt;button onClick={onClose}&gt;&lt;X /&gt;&lt;/button&gt;
+                &lt;div className="modal-body"&gt;{children}&lt;/div&gt;
+                {footer && &lt;div className="modal-footer"&gt;{footer}&lt;/div&gt;}
+            &lt;/div&gt;
+        &lt;/div&gt;
+    );
+};</code></pre>
+                </div>
+                <div class="callout callout-blue">
+                    <h4>📐 Size Options</h4>
+                    <ul>
+                        <li><code>sm</code> — Compact dialogs (confirmations, alerts)</li>
+                        <li><code>md</code> — Standard modals (forms, details)</li>
+                        <li><code>lg</code> — Large modals (image gallery, full claim review)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 6. PAGES -->
+            <section id="pages">
+                <h2><span class="emoji">📄</span> 6. Key Pages</h2>
+
+                <h3>Dashboard.jsx — Personal Hub</h3>
+                <p>The main landing page after login. Fetches the user's items, claims, and notifications <strong>in
+                        parallel</strong> for speed, then computes statistics from the results.</p>
+                <div class="card">
+                    <span class="code-label">pages/Dashboard.jsx</span>
+                    <pre><code class="language-jsx">const Dashboard = () => {
+    const { user } = useAuth();
+    const [myItems, setMyItems] = useState([]);
+    const [myClaims, setMyClaims] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        // Fetch all 3 data sources IN PARALLEL for speed
+        const [items, claims, notifs] = await Promise.all([
+            getMyItems(),
+            getMyClaims(),
+            getNotifications(5),       // latest 5 only
+        ]);
+        setMyItems(items.items || []);
+        setMyClaims(claims);
+        setNotifications(notifs);
+    }, []);
+
+    // Computed statistics from fetched data
+    const matchedItemsCount = myItems.filter(
+        i => i.matchedItems?.length > 0
+    ).length;
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    return (
+      &lt;&gt;
+        {/* Welcome banner with user's name */}
+        &lt;h1&gt;Welcome back, {user?.name}! 👋&lt;/h1&gt;
+
+        {/* Quick Action Cards — navigate on click */}
+        &lt;Link to="/report-item"&gt;
+            &lt;ActionCard title="Report an Item" icon={&lt;Plus /&gt;} /&gt;
+        &lt;/Link&gt;
+        &lt;Link to="/items"&gt;
+            &lt;ActionCard title="Browse Items" icon={&lt;Search /&gt;} /&gt;
+        &lt;/Link&gt;
+
+        {/* Statistics Row — 4 stat cards */}
+        &lt;StatCard label="My Items" value={myItems.length} /&gt;
+        &lt;StatCard label="Matches Found" value={matchedItemsCount} /&gt;
+        &lt;StatCard label="My Claims" value={myClaims.length} /&gt;
+        &lt;StatCard label="Unread Alerts" value={unreadCount} /&gt;
+
+        {/* Recent Items Grid — shows top 3 */}
+        {myItems.slice(0, 3).map(item =>
+            &lt;ItemCard key={item._id} item={item} /&gt;
+        )}
+
+        {/* Recent Notifications List */}
+        {notifications.map(n =>
+            &lt;NotificationRow key={n._id} notif={n} /&gt;
+        )}
+      &lt;/&gt;
+    );
+};</code></pre>
+                </div>
+                <div class="callout callout-blue">
+                    <h4>⚡ Performance Pattern</h4>
+                    <ul>
+                        <li><strong>Promise.all:</strong> All 3 API calls run simultaneously instead of sequentially —
+                            this makes the Dashboard load ~3x faster.</li>
+                        <li><strong>Computed stats:</strong> <code>matchedItemsCount</code> and <code>unreadCount</code>
+                            are derived from the fetched data, not separate API calls.</li>
+                        <li><strong>Slice(0, 3):</strong> Only the 3 most recent items are displayed in the grid
+                            preview.</li>
+                    </ul>
+                </div>
+
+                <h3>ReportItem.jsx — Item Reporting Form</h3>
+                <p>A comprehensive form for reporting lost or found items with image upload support.</p>
+                <div class="card">
+                    <span class="code-label">pages/ReportItem.jsx — Form Fields</span>
+                    <pre><code class="language-jsx">// Key form fields:
+// • type:       "Lost" or "Found" (radio toggle)
+// • title:      Text input (required)
+// • description: Textarea (required, max 2000 chars)
+// • category:   Dropdown — Electronics, Clothing, Documents, etc.
+// • location:   Text input — where it was lost/found
+// • date:       Date picker — when it happened
+// • images:     File upload (multiple allowed)
+// • Optional:   color, brand, identifyingFeatures
+
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        // createItem() internally converts to FormData
+        // to support image file uploads via multipart/form-data
+        await createItem(formData);
+        toast.success('Item reported successfully!');
+        navigate('/my-items');  // Redirect to user's items list
+    } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to report');
+    }
+};</code></pre>
+                </div>
+                <div class="callout callout-green">
+                    <h4>📸 How Image Upload Works</h4>
+                    <ul>
+                        <li>The user selects images via a file input. JavaScript creates a <code>FormData</code> object.
+                        </li>
+                        <li>Text fields are appended as key-value pairs. Each image is appended as
+                            <code>'images'</code>.
+                        </li>
+                        <li>The request is sent with <code>Content-Type: multipart/form-data</code> so Express + Multer
+                            can process the files on the backend.</li>
+                        <li>Images are saved to the <code>/uploads</code> directory and their paths are stored in the
+                            Item document.</li>
+                    </ul>
+                </div>
+
+                <h3>ItemDetail.jsx — Full Item View</h3>
+                <p>The complete detail page for a single item, with an image gallery, matching panel, and role-based
+                    action buttons.</p>
+                <div class="card">
+                    <span class="code-label">pages/ItemDetail.jsx — Features</span>
+                    <pre><code class="language-jsx">// FEATURES of ItemDetail page:
+
+// 1. Image Gallery — click to open full-screen ImageModal
+&lt;img src={getImageUrl(item.images[activeIndex])} /&gt;
+&lt;ImageModal isOpen={showModal} image={item.images[activeIndex]} /&gt;
+
+// 2. Item Metadata
+&lt;h1&gt;{item.title}&lt;/h1&gt;
+&lt;Badge&gt;{item.type}&lt;/Badge&gt;     {/* Lost or Found */}
+&lt;Badge&gt;{item.status}&lt;/Badge&gt;   {/* active, claimed, returned */}
+&lt;p&gt;{item.category} · {item.location} · {formatDate(item.date)}&lt;/p&gt;
+&lt;p&gt;Reported by: {item.reportedBy?.name}&lt;/p&gt;
+
+// 3. Matches Section — lists items that could be the same item
+{item.matchedItems?.map(match =>
+    &lt;ItemCard key={match._id} item={match} plain /&gt;
+)}
+
+// 4. Claim Button — only shown on "found" items to non-reporters
+{item.type === 'found' && item.reportedBy._id !== user._id && (
+    &lt;button onClick={() => navigate(`/claim/${item._id}`)}&gt;
+        Claim This Item
+    &lt;/button&gt;
+)}
+
+// 5. Edit/Delete — shown only to the item's reporter
+{item.reportedBy._id === user._id && (
+    &lt;&gt;
+        &lt;button onClick={handleEdit}&gt;Edit&lt;/button&gt;
+        &lt;button onClick={handleDelete}&gt;Delete&lt;/button&gt;
+    &lt;/&gt;
+)}
+
+// 6. Status Update — staff/admin can directly change status
+{(user.role === 'staff' || user.role === 'admin') && (
+    &lt;select onChange={handleStatusChange} value={item.status}&gt;
+        &lt;option value="active"&gt;Active&lt;/option&gt;
+        &lt;option value="claimed"&gt;Claimed&lt;/option&gt;
+        &lt;option value="returned"&gt;Returned&lt;/option&gt;
+        &lt;option value="archived"&gt;Archived&lt;/option&gt;
+    &lt;/select&gt;
+)}</code></pre>
+                </div>
+
+                <h3>VerifyClaims.jsx — Staff Claim Review</h3>
+                <p>Staff-only page to review, approve, or reject pending claims. Includes status filter tabs and proof
+                    viewing.</p>
+                <div class="card">
+                    <span class="code-label">pages/VerifyClaims.jsx</span>
+                    <pre><code class="language-jsx">const VerifyClaims = () => {
+    const [activeTab, setActiveTab] = useState('pending');
+    const [claims, setClaims] = useState([]);
+
+    useEffect(() => {
+        // Fetch claims filtered by the active tab
+        const data = await getClaims({ status: activeTab });
+        setClaims(data);
+    }, [activeTab]);
+
+    return (
+      &lt;&gt;
+        {/* Filter tabs: All | Pending | Approved | Rejected */}
+        &lt;div className="tabs"&gt;
+            {['all', 'pending', 'approved', 'rejected'].map(tab =>
+                &lt;button key={tab}
+                    className={activeTab === tab ? 'active-tab' : ''}
+                    onClick={() => setActiveTab(tab)}&gt;
+                    {tab}
+                &lt;/button&gt;
+            )}
+        &lt;/div&gt;
+
+        {/* Claim Cards — each shows item, proof, and actions */}
+        {claims.map(claim => (
+            &lt;div key={claim._id} className="claim-card"&gt;
+                &lt;ItemCard item={claim.item} plain /&gt;
+                &lt;p&gt;Proof: {claim.proofDescription}&lt;/p&gt;
+                {claim.proofImages?.map(img =>
+                    &lt;img src={getImageUrl(img)} /&gt;
+                )}
+
+                {/* Staff action buttons */}
+                {claim.status === 'pending' && (
+                    &lt;&gt;
+                        &lt;button onClick={() => updateClaimStatus(
+                            claim._id, { status: 'approved' }
+                        )}&gt;
+                            ✅ Approve
+                        &lt;/button&gt;
+                        &lt;button onClick={() => updateClaimStatus(
+                            claim._id, {
+                                status: 'rejected',
+                                verificationNotes: 'Proof insufficient'
+                            }
+                        )}&gt;
+                            ❌ Reject
+                        &lt;/button&gt;
+                    &lt;/&gt;
+                )}
+            &lt;/div&gt;
+        ))}
+      &lt;/&gt;
+    );
+};</code></pre>
+                </div>
+                <div class="callout callout-blue">
+                    <h4>🛡️ Approval Flow</h4>
+                    <ul>
+                        <li>When <strong>approved</strong>: item status changes to <code>'claimed'</code>, and the item
+                            reporter gets a notification.</li>
+                        <li>When <strong>rejected</strong>: staff must provide a <code>verificationNotes</code> reason
+                            explaining why.</li>
+                        <li>The <code>verifiedBy</code> field automatically records which staff member made the
+                            decision.</li>
+                    </ul>
+                </div>
+
+                <h3>AdminDashboard.jsx — Platform Overview</h3>
+                <p>Admin-only page showing platform-wide statistics: total users, items, claims, and system health
+                    metrics using <code>StatCard</code> components.</p>
+
+                <h3>AdminUsers.jsx — User Management</h3>
+                <p>Admin can search, filter by role, <strong>ban/unban</strong>, and <strong>delete</strong> users.
+                    Features a searchable table with role badges and action buttons.</p>
+
+                <h3>AdminSettings.jsx — System Controls</h3>
+                <p>System configuration page including the <strong>Maintenance Mode</strong> toggle, which disables the
+                    entire app for non-admins when enabled. When maintenance mode is active, all API requests from
+                    non-admin users receive a <code>503</code> response, and the frontend redirects them to a
+                    <code>/maintenance</code> page.
+                </p>
+            </section>
+
+            <!-- 7. MODELS -->
+            <section id="models">
+                <h2><span class="emoji">🗄️</span> 7. Backend Data Models</h2>
+
+                <h3>User.js</h3>
+                <div class="card">
+                    <pre><code class="language-javascript">const userSchema = {
+    name:       String,          // required, max 100 chars
+    email:      String,          // unique, must match @rvce.edu.in
+    password:   String,          // bcrypt hashed, select: false
+    role:       ['student', 'staff', 'admin'],  // default: 'student'
+    phone:      String,          // optional
+    department: String,          // optional
+    verified:   Boolean,         // must verify email via OTP
+    isBanned:   Boolean,
+    profilePicture: String       // file path
+}
+
+// Methods: comparePassword(), generateAuthToken(), getPublicProfile()</code></pre>
+                </div>
+
+                <h3>Item.js</h3>
+                <div class="card">
+                    <pre><code class="language-javascript">const itemSchema = {
+    type:       ['lost', 'found'],       // required
+    title:      String,                  // max 200 chars
+    description: String,                 // max 2000 chars
+    category:   String,
+    location:   String,
+    date:       Date,
+    images:     [String],
+    status:     ['active', 'claimed', 'returned', 'archived'],
+    reportedBy: ObjectId → User,
+    matchedItems: [ObjectId → Item],
+    claimRequests: [ObjectId → Claim]
+}
+// Text index on: title, description, location
+// Virtuals: isMatched, matchCount</code></pre>
+                </div>
+
+                <h3>Claim.js</h3>
+                <div class="card">
+                    <pre><code class="language-javascript">const claimSchema = {
+    item:              ObjectId → Item,
+    claimedBy:         ObjectId → User,
+    status:            ['pending', 'approved', 'rejected'],
+    proofDescription:  String,   // max 1000 chars
+    proofImages:       [String],
+    verifiedBy:        ObjectId → User,
+    verificationNotes: String
+}</code></pre>
+                </div>
+                <div class="diagram-card">
+                    <div class="diagram-title">Entity Relationship Diagram</div>
+                    <div class="mermaid">
+                        erDiagram
+                        USER ||--o{ ITEM : "reports"
+                        USER ||--o{ CLAIM : "submits"
+                        USER ||--o{ NOTIFICATION : "receives"
+                        ITEM ||--o{ CLAIM : "has"
+                        ITEM }o--o{ ITEM : "matchedItems"
+                        CLAIM }o--|| USER : "verifiedBy"
+
+                        USER {
+                        string name
+                        string email
+                        string password
+                        enum role
+                        boolean verified
+                        boolean isBanned
+                        }
+                        ITEM {
+                        enum type
+                        string title
+                        string description
+                        string category
+                        string location
+                        date date
+                        enum status
+                        }
+                        CLAIM {
+                        enum status
+                        string proofDescription
+                        string verificationNotes
+                        }
+                        NOTIFICATION {
+                        string type
+                        string message
+                        boolean read
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. SERVER -->
+            <section id="server">
+                <h2><span class="emoji">🖥️</span> 8. Server &amp; Middleware</h2>
+                <div class="card">
+                    <span class="code-label">server.js — Boot Sequence</span>
+                    <pre><code class="language-javascript">connectDB();                                    // 1. Connect to MongoDB
+app.use(cors({ origin: 'http://localhost:5173' })); // 2. Allow frontend
+app.use(express.json());                        // 3. Parse JSON bodies
+app.use(morgan('dev'));                          // 4. Log all requests
+app.use('/uploads', express.static('uploads')); // 5. Serve images
+
+// 6. Decode JWT silently (for maintenance check)
+app.use(async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (token) req.user = await User.findById(
+        jwt.verify(token, JWT_SECRET).id
+    );
+    next();
+});
+
+app.use(maintenanceMode);                       // 7. Block non-admins
+app.use('/api/auth', authRoutes);               // 8. Route groups
+app.use('/api/items', itemRoutes);
+app.use('/api/claims', claimRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
+app.use(errorHandler);                          // 9. Central error handler</code></pre>
+                </div>
+            </section>
+
+            <!-- 9. LIFECYCLE -->
+            <section id="lifecycle">
+                <h2><span class="emoji">🔄</span> 9. Data Lifecycle Flow</h2>
+                <p>Scenario: A student loses a backpack and eventually gets it back.</p>
+                <div class="card">
+                    <div class="timeline">
+                        <div class="tl-item">
+                            <div class="tl-dot" style="background:var(--accent)"></div>
+                            <h4>Step 1 — Student Logs In</h4>
+                            <p><code>POST /api/auth/login</code> → JWT stored in localStorage</p>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-dot" style="background:var(--accent)"></div>
+                            <h4>Step 2 — Reports Lost Item</h4>
+                            <p><code>POST /api/items</code> with FormData (image attached) → Item created: type='lost',
+                                status='active'</p>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-dot" style="background:var(--cyan)"></div>
+                            <h4>Step 3 — Matching Runs</h4>
+                            <p>Backend finds a 'found' item with similar properties → links via
+                                <code>matchedItems[]</code> → Notification sent
+                            </p>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-dot" style="background:var(--orange)"></div>
+                            <h4>Step 4 — Finder Submits Claim</h4>
+                            <p><code>POST /api/claims</code> with proof description &amp; images → Claim:
+                                status='pending'</p>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-dot" style="background:var(--orange)"></div>
+                            <h4>Step 5 — Staff Reviews</h4>
+                            <p><code>GET /api/claims?status=pending</code> → Staff sees proof details</p>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-dot" style="background:var(--green)"></div>
+                            <h4>Step 6 — Claim Approved</h4>
+                            <p><code>PATCH /api/claims/:id</code> → Item status → 'claimed' → Student notified</p>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-dot" style="background:var(--green)"></div>
+                            <h4>Step 7 — Item Returned ✅</h4>
+                            <p>Student views notification in-app. The item is returned to its owner.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 10. DIAGRAM -->
+            <section id="diagram">
+                <h2><span class="emoji">📊</span> 10. Summary Diagram</h2>
+
+                <div class="diagram-card">
+                    <div class="diagram-title">Full System Architecture</div>
+                    <div class="mermaid">
+                        graph TD
+                        subgraph "Frontend (React SPA)"
+                        A["App.jsx<br />Router + Providers"] --> B["Pages<br />18 views"]
+                        A --> C["Components<br />15 reusable"]
+                        B --> D["Services<br />API calls"]
+                        end
+
+                        subgraph "API Layer"
+                        D -->|"Axios + JWT"| E["Express Server :5000"]
+                        end
+
+                        subgraph "Backend (Node.js)"
+                        E --> F["Auth Middleware"]
+                        E --> G["Maintenance Middleware"]
+                        F --> H["Auth Controller"]
+                        F --> I["Item Controller"]
+                        F --> J["Claim Controller"]
+                        F --> K["Notification Controller"]
+                        F --> L["Admin Controller"]
+                        end
+
+                        subgraph "Data Layer"
+                        H & I & J & K & L --> M[("MongoDB<br />campusfind")]
+                        I -->|"Multer"| N["📁 /uploads"]
+                        end
+
+                        subgraph "External"
+                        H -->|"Nodemailer"| O["✉️ Email (OTP)"]
+                        I --> P["🔍 Matching Service"]
+                        end
+                    </div>
+                </div>
+
+                <div class="diagram-card">
+                    <div class="diagram-title">Claim Lifecycle State Machine</div>
+                    <div class="mermaid">
+                        stateDiagram-v2
+                        [*] --> Active : Item Reported
+                        Active --> Active : Matching Runs
+                        Active --> Pending : Claim Submitted
+                        Pending --> Approved : Staff Approves
+                        Pending --> Rejected : Staff Rejects
+                        Approved --> Claimed : Item Status Updated
+                        Claimed --> Returned : Item Returned
+                        Returned --> [*]
+                        Rejected --> Active : User Can Re-Claim
+                        Active --> Archived : No Activity
+                    </div>
+                </div>
+
+                <div class="flow">
+                    <div class="flow-box" style="border-color:var(--accent)">
+                        <div class="icon">🌐</div>React SPA<div class="sub">Vite + Tailwind</div>
+                    </div>
+                    <div class="flow-box" style="border-color:var(--cyan)">
+                        <div class="icon">🔗</div>Axios + JWT<div class="sub">API Layer</div>
+                    </div>
+                    <div class="flow-box" style="border-color:var(--orange)">
+                        <div class="icon">⚙️</div>Express API<div class="sub">Port 5000</div>
+                    </div>
+                    <div class="flow-box" style="border-color:var(--green)">
+                        <div class="icon">🛡️</div>Middleware<div class="sub">Auth · Maintenance</div>
+                    </div>
+                    <div class="flow-box" style="border-color:var(--red)">
+                        <div class="icon">📦</div>Controllers<div class="sub">Business Logic</div>
+                    </div>
+                    <div class="flow-box" style="border-color:var(--accent2)">
+                        <div class="icon">🗄️</div>MongoDB<div class="sub">Mongoose ODM</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:1rem">
+                    <h3 style="margin-top:0">Collections</h3>
+                    <div class="flow" style="grid-template-columns:repeat(4,1fr)">
+                        <div class="flow-box">
+                            <div class="icon">👤</div>Users
+                        </div>
+                        <div class="flow-box">
+                            <div class="icon">📋</div>Items
+                        </div>
+                        <div class="flow-box">
+                            <div class="icon">✋</div>Claims
+                        </div>
+                        <div class="flow-box">
+                            <div class="icon">🔔</div>Notifications
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer
+                style="margin-top:4rem;padding-top:2rem;border-top:1px solid var(--surface2);text-align:center;color:var(--text2);font-size:.85rem">
+                <p>&copy; 2026 CampusFind Project · Created for Academic Presentation</p>
+                <p style="margin-top:.5rem">RV College of Engineering</p>
+            </footer>
+
+        </div>
+    </div>
+
+    <button class="btn-print" onclick="window.print()">🖨️ Print to PDF</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        // Initialize Mermaid with dark theme
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#6366f1',
+                primaryTextColor: '#e2e8f0',
+                primaryBorderColor: '#818cf8',
+                lineColor: '#94a3b8',
+                secondaryColor: '#1e293b',
+                tertiaryColor: '#334155',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '14px'
+            },
+            flowchart: { curve: 'basis', padding: 20 },
+            sequence: { actorMargin: 80, messageMargin: 40 }
+        });
+
+        // Active sidebar link on scroll
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.sidebar nav a');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (window.scrollY >= s.offsetTop - 120) current = s.id;
+            });
+            navLinks.forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+            });
+        });
+    </script>
+</body>
+
+</html>

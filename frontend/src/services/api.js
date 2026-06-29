@@ -40,6 +40,19 @@ api.interceptors.response.use(
                 window.location.href = '/login';
             }
         }
+
+        // Handle maintenance mode
+        if (error.response?.status === 503 && error.response.data.isMaintenance) {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const isMaintenancePage = window.location.pathname === '/maintenance';
+            const isLoginPage = window.location.pathname === '/login';
+
+            // Redirect non-admins to maintenance page
+            if (user.role !== 'admin' && !isMaintenancePage && !isLoginPage) {
+                window.location.href = '/maintenance';
+            }
+        }
+
         return Promise.reject(error);
     }
 );

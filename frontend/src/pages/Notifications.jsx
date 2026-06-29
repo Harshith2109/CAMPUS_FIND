@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getNotifications, markAsRead } from '../services/notificationService';
+import { getNotifications, markAsRead, deleteNotification } from '../services/notificationService';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from '../utils/toast';
-import { CircleCheck, TriangleAlert, Info, BellOff } from 'lucide-react';
+import { CircleCheck, TriangleAlert, Info, BellOff, X } from 'lucide-react';
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -34,12 +34,25 @@ const Notifications = () => {
         }
     };
 
+    const handleDeleteNotification = async (id) => {
+        try {
+            // Optimistic update
+            setNotifications(notifications.filter(n => n._id !== id));
+            await deleteNotification(id);
+        } catch (error) {
+            toast.error(error, 'Failed to delete notification');
+            fetchNotifications(); // Revert on error
+        }
+    };
+
     const getNotificationIcon = (type) => {
         switch (type) {
             case 'match':
                 return <CircleCheck className="w-6 h-6" />;
             case 'claim':
                 return <TriangleAlert className="w-6 h-6" />;
+            case 'status':
+                return <CircleCheck className="w-6 h-6" />;
             default:
                 return <Info className="w-6 h-6" />;
         }
@@ -51,6 +64,8 @@ const Notifications = () => {
                 return 'bg-brand-success/20 text-brand-success';
             case 'claim':
                 return 'bg-brand-warning/20 text-brand-warning';
+            case 'status':
+                return 'bg-brand-success/20 text-brand-success';
             default:
                 return 'bg-brand-primary/20 text-brand-primary';
         }
@@ -76,10 +91,21 @@ const Notifications = () => {
                     {notifications.map(notification => (
                         <div
                             key={notification._id}
-                            className={`card cursor-pointer transition-all hover-scale ${!notification.read ? 'bg-brand-primary/10 border-l-4 border-brand-primary' : ''
+                            className={`card cursor-pointer transition-all hover-scale group relative ${!notification.read ? 'bg-brand-primary/10 border-l-4 border-brand-primary' : ''
                                 }`}
                             onClick={() => !notification.read && handleMarkAsRead(notification._id)}
                         >
+                            {/* Dismiss Button */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteNotification(notification._id);
+                                }}
+                                className="absolute top-2 right-2 p-1 rounded-full text-text-muted hover:text-text-main hover:bg-bg-main opacity-0 group-hover:opacity-100 transition-all z-10"
+                                title="Delete"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                             <div className="flex items-start gap-4">
                                 {/* Icon */}
                                 <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${getNotificationColor(notification.type)}`}>

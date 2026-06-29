@@ -1,5 +1,7 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+const SystemSettings = require('../models/SystemSettings');
 
 // Configure storage
 const storage = multer.diskStorage({
@@ -35,4 +37,53 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
-module.exports = upload;
+// Middleware to validate limits dynamically from database
+const validateLimits = (fieldName = 'images') => async (req, res, next) => {
+    if (!req.files || req.files.length === 0) {
+        return next();
+    }
+
+    try {
+        const settings = await SystemSettings.getSettings();
+        const { maxImagesPerItem, maxImageSize } = settings;
+
+        // Cleanup function for failed validation
+        const cleanup = () => {
+            req.files.forEach(file => {
+                if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
+                }
+            });
+        };
+
+        // Check image count
+        // Note: For updates, we might need a different check if we're adding to existing ones,
+        // but for now we enforce the upload limit per request.
+        if (req.files.length > maxImagesPerItem) {
+            cleanup();
+            return res.status(400).json({
+                success: false,
+                message: `You can only upload a maximum of ${maxImagesPerItem} images.`
+            });
+        }
+
+        // Check each file size
+        const limitInBytes = maxImageSize * 1024 * 1024;
+        const oversizedFile = req.files.find(file => file.size > limitInBytes);
+
+        if (oversizedFile) {
+            cleanup();
+            return res.status(400).json({
+                success: false,
+                message: `Each image must be smaller than ${maxImageSize}MB.`
+            });
+        }
+
+        next();
+    } catch (error) {
+        console.error('Error in validateLimits middleware:', error);
+        next(); // Proceed if settings fail to load, falling back to multer defaults
+    }
+};
+
+module.exports = { upload, validateLimits };

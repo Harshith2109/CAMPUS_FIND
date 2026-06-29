@@ -79,7 +79,12 @@ exports.getItems = async (req, res, next) => {
 
         if (type) query.type = type;
         if (category) query.category = category;
-        if (status) query.status = status;
+        if (status) {
+            query.status = status;
+        } else {
+            // Default to only showing active items in the browser
+            query.status = 'active';
+        }
         if (location) query.location = new RegExp(location, 'i');
 
         // Date range filter

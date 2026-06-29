@@ -15,7 +15,7 @@ import toast from '../utils/toast';
 import { useNavigate } from 'react-router-dom';
 import PasswordField from '../components/PasswordField';
 import { getImageUrl } from '../utils/helpers';
-import { Camera, Trash2, Mail, ShieldAlert } from 'lucide-react';
+import { Camera, Trash2, Mail, ShieldAlert, X } from 'lucide-react';
 
 // RVCE Departments
 const DEPARTMENTS = [
@@ -430,7 +430,13 @@ const Profile = () => {
             {/* Email OTP Modal */}
             {showEmailOtpModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main">
+                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main relative">
+                        <button
+                            onClick={() => setShowEmailOtpModal(false)}
+                            className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-main transition-colors"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
                         <div className="text-center mb-6">
                             <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Mail className="w-8 h-8 text-brand-primary" />
@@ -475,7 +481,13 @@ const Profile = () => {
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main">
+                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main relative">
+                        <button
+                            onClick={() => setShowDeleteModal(false)}
+                            className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-main transition-colors"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
                         <div className="text-center mb-6">
                             <div className="w-16 h-16 bg-brand-danger/10 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <ShieldAlert className="w-8 h-8 text-brand-danger" />

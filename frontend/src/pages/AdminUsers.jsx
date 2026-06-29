@@ -201,7 +201,13 @@ const AdminUsers = () => {
             {/* Add User Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main">
+                    <div className="bg-bg-surface p-8 rounded-2xl shadow-xl w-full max-w-md border border-border-main relative">
+                        <button
+                            onClick={() => setShowAddModal(false)}
+                            className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-main transition-colors"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
                         <h2 className="text-2xl font-bold mb-6 text-text-main">Add New User</h2>
                         <form onSubmit={handleCreateUser} className="space-y-4">
                             <div>

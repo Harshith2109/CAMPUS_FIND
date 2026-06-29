@@ -11,6 +11,7 @@ import { ZoomIn, ClipboardX } from 'lucide-react';
 const MyClaims = () => {
     const [claims, setClaims] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('active');
     const [modalInfo, setModalInfo] = useState({ isOpen: false, index: 0, images: [] });
 
 
@@ -28,6 +29,21 @@ const MyClaims = () => {
             setLoading(false);
         }
     };
+
+    const activeClaims = claims.filter(claim =>
+        claim.status === 'pending' &&
+        claim.item?.status !== 'claimed' &&
+        claim.item?.status !== 'returned'
+    );
+
+    const resolvedClaims = claims.filter(claim =>
+        claim.status === 'approved' ||
+        claim.status === 'rejected' ||
+        claim.item?.status === 'claimed' ||
+        claim.item?.status === 'returned'
+    );
+
+    const displayClaims = filter === 'active' ? activeClaims : resolvedClaims;
 
     const handleCancelClaim = async (id) => {
         if (!confirm('Are you sure you want to cancel this claim?')) return;
@@ -64,10 +80,29 @@ const MyClaims = () => {
                 divided
             />
 
+            {/* Tabs */}
+            <div className="mb-6 flex gap-2">
+                {[
+                    { id: 'active', label: 'Active Claims', count: activeClaims.length },
+                    { id: 'resolved', label: 'Resolved', count: resolvedClaims.length }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setFilter(tab.id)}
+                        className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-sm border ${filter === tab.id
+                            ? 'bg-brand-primary text-white border-brand-primary shadow-brand-primary/20'
+                            : 'bg-bg-surface text-text-muted border-border-main hover:border-brand-primary/50 hover:text-text-main'
+                            }`}
+                    >
+                        {tab.label} <span className={`ml-1.5 text-xs opacity-80 ${filter === tab.id ? 'text-white' : 'text-text-muted'}`}>({tab.count})</span>
+                    </button>
+                ))}
+            </div>
+
             {/* Claims List */}
-            {claims.length > 0 ? (
+            {displayClaims.length > 0 ? (
                 <div className="space-y-6">
-                    {claims.map(claim => (
+                    {displayClaims.map(claim => (
                         <div key={claim._id} className="card bg-bg-surface border border-border-main shadow-sm rounded-2xl overflow-hidden p-6 transition-all hover:shadow-md">
                             <div className="flex flex-col md:flex-row gap-6">
                                 {/* Item Image */}
@@ -93,7 +128,7 @@ const MyClaims = () => {
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
                                             <h3 className="text-2xl font-bold text-text-main">
-                                                {claim.item?.name || 'Unknown Item'}
+                                                {claim.item?.name || claim.item?.title || 'Unknown Item'}
                                             </h3>
                                             <p className="text-sm text-text-muted mt-1">
                                                 Claimed on {new Date(claim.createdAt).toLocaleDateString()}
@@ -117,7 +152,7 @@ const MyClaims = () => {
                                         </div>
                                         <div>
                                             <span className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-2">Claim Description</span>
-                                            <p className="text-text-main bg-bg-main p-4 rounded-xl border border-border-main italic">"{claim.description}"</p>
+                                            <p className="text-text-main bg-bg-main p-4 rounded-xl border border-border-main italic">"{claim.description || claim.proofDescription}"</p>
                                         </div>
 
                                         {claim.proofImages && claim.proofImages.length > 0 && (
@@ -179,10 +214,14 @@ const MyClaims = () => {
                     <div className="w-20 h-20 bg-bg-main rounded-full flex items-center justify-center mx-auto mb-6">
                         <ClipboardX className="w-10 h-10 text-text-muted" />
                     </div>
-                    <p className="text-text-muted text-lg font-medium mb-6">You haven't made any claims yet</p>
-                    <Link to="/items" className="btn btn-primary px-8">
-                        Browse Items
-                    </Link>
+                    <p className="text-text-muted text-lg font-medium mb-6">
+                        {filter === 'active' ? "You haven't made any claims yet" : "No resolved claims found"}
+                    </p>
+                    {filter === 'active' && (
+                        <Link to="/items" className="btn btn-primary px-8">
+                            Browse Items
+                        </Link>
+                    )}
                 </div>
             )}
 

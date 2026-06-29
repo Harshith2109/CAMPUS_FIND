@@ -142,7 +142,7 @@ exports.sendClaimStatusUpdate = async (user, claim, item, status) => {
         ${claim.verificationNotes ? `<p><strong>Notes:</strong> ${claim.verificationNotes}</p>` : ''}
       </div>
       ${status === 'approved' ?
-      '<p>Congratulations! You can now coordinate with the finder to retrieve your item.</p>' :
+      '<p>Congratulations! Your item is verified. Please collect it from the lost and found office during working hours.</p>' :
       '<p>If you believe this is an error, please contact support.</p>'
     }
       <p style="margin-top: 30px;">Best regards,<br>The CampusFind Team</p>

@@ -9,6 +9,10 @@ const AdminSettings = () => {
     const [loading, setLoading] = useState(true);
     const [newCategory, setNewCategory] = useState('');
     const [saving, setSaving] = useState(false);
+    const [formValues, setFormValues] = useState({
+        maxImagesPerItem: '',
+        maxImageSize: ''
+    });
 
     useEffect(() => {
         fetchSettings();
@@ -18,6 +22,10 @@ const AdminSettings = () => {
         try {
             const data = await getSettings();
             setSettings(data.settings);
+            setFormValues({
+                maxImagesPerItem: data.settings.maxImagesPerItem,
+                maxImageSize: data.settings.maxImageSize
+            });
         } catch (error) {
             toast.error(error, 'Failed to load settings');
         } finally {
@@ -45,7 +53,27 @@ const AdminSettings = () => {
     };
 
     const handleToggle = (field) => {
-        updateSystemSettings({ [field]: !settings[field] });
+        const newValue = !settings[field];
+        updateSystemSettings({ [field]: newValue });
+    };
+
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setFormValues(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveFileSettings = () => {
+        const updates = {};
+        if (formValues.maxImagesPerItem !== '') {
+            updates.maxImagesPerItem = parseInt(formValues.maxImagesPerItem);
+        }
+        if (formValues.maxImageSize !== '') {
+            updates.maxImageSize = parseFloat(formValues.maxImageSize);
+        }
+
+        if (Object.keys(updates).length > 0) {
+            updateSystemSettings(updates);
+        }
     };
 
     const updateSystemSettings = async (updates) => {
@@ -65,18 +93,18 @@ const AdminSettings = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">System Settings</h1>
+            <h1 className="text-3xl font-bold text-text-main mb-8">System Settings</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Category Management */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="bg-bg-surface rounded-xl shadow-sm border border-border-main p-6">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-primary-50 rounded-lg text-primary-600">
+                        <div className="p-2 bg-brand-primary/10 rounded-lg text-brand-primary">
                             <Tags className="w-5 h-5" />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">Item Categories</h2>
+                        <h2 className="text-xl font-bold text-text-main">Item Categories</h2>
                     </div>
-                    <p className="text-gray-600 mb-4 text-sm">Manage the list of categories available for items.</p>
+                    <p className="text-text-muted mb-4 text-sm">Manage the list of categories available for items.</p>
 
                     <div className="flex gap-2 mb-4">
                         <input
@@ -98,11 +126,11 @@ const AdminSettings = () => {
 
                     <div className="flex flex-wrap gap-2">
                         {settings?.categories?.map((category) => (
-                            <span key={category} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                            <span key={category} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-bg-main text-text-main border border-border-main">
                                 {category}
                                 <button
                                     onClick={() => handleRemoveCategory(category)}
-                                    className="ml-2 text-gray-500 hover:text-red-500"
+                                    className="ml-2 text-text-muted hover:text-brand-danger"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -112,24 +140,24 @@ const AdminSettings = () => {
                 </div>
 
                 {/* General Settings */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="bg-bg-surface rounded-xl shadow-sm border border-border-main p-6">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-success-50 rounded-lg text-success-600">
+                        <div className="p-2 bg-brand-success/10 rounded-lg text-brand-success">
                             <LayoutGrid className="w-5 h-5" />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">General Configuration</h2>
+                        <h2 className="text-xl font-bold text-text-main">General Configuration</h2>
                     </div>
 
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="font-medium text-gray-900">Allow User Registration</h3>
-                                <p className="text-sm text-gray-500">If disabled, only admins can add new users.</p>
+                                <h3 className="font-medium text-text-main">Allow User Registration</h3>
+                                <p className="text-sm text-text-muted">If disabled, only admins can add new users.</p>
                             </div>
                             <button
                                 onClick={() => handleToggle('allowRegistration')}
                                 disabled={saving}
-                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${settings?.allowRegistration ? 'bg-primary-600' : 'bg-gray-200'
+                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${settings?.allowRegistration ? 'bg-brand-primary' : 'bg-border-main'
                                     }`}
                             >
                                 <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${settings?.allowRegistration ? 'translate-x-5' : 'translate-x-0'
@@ -137,16 +165,16 @@ const AdminSettings = () => {
                             </button>
                         </div>
 
-                        <div className="border-t border-gray-100 pt-4">
+                        <div className="border-t border-border-main/50 pt-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="font-medium text-gray-900">Maintenance Mode</h3>
-                                    <p className="text-sm text-gray-500">Disable detailed access for non-admin users.</p>
+                                    <h3 className="font-medium text-text-main">Maintenance Mode</h3>
+                                    <p className="text-sm text-text-muted">Disable detailed access for non-admin users.</p>
                                 </div>
                                 <button
                                     onClick={() => handleToggle('maintenanceMode')}
                                     disabled={saving}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${settings?.maintenanceMode ? 'bg-primary-600' : 'bg-gray-200'
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${settings?.maintenanceMode ? 'bg-brand-primary' : 'bg-border-main'
                                         }`}
                                 >
                                     <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${settings?.maintenanceMode ? 'translate-x-5' : 'translate-x-0'
@@ -158,45 +186,57 @@ const AdminSettings = () => {
                 </div>
 
                 {/* File Management Settings */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="bg-bg-surface rounded-xl shadow-sm border border-border-main p-6">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-warning-50 rounded-lg text-warning-600">
+                        <div className="p-2 bg-brand-warning/10 rounded-lg text-brand-warning">
                             <FileUp className="w-5 h-5" />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">File Management</h2>
+                        <h2 className="text-xl font-bold text-text-main">File Management</h2>
                     </div>
-                    <p className="text-gray-600 mb-4 text-sm">Configure upload limits for images.</p>
+                    <p className="text-text-muted mb-4 text-sm">Configure upload limits for images.</p>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-text-muted mb-1">
                                 Maximum Images per Item
                             </label>
                             <input
                                 type="number"
+                                name="maxImagesPerItem"
                                 min="1"
                                 max="20"
-                                value={settings?.maxImagesPerItem || 5}
-                                onChange={(e) => updateSystemSettings({ maxImagesPerItem: parseInt(e.target.value) })}
+                                value={formValues.maxImagesPerItem}
+                                onChange={handleFormChange}
                                 className="input"
                                 disabled={saving}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-text-muted mb-1">
                                 Maximum Image Size (MB)
                             </label>
                             <input
                                 type="number"
+                                name="maxImageSize"
                                 min="0.1"
                                 step="0.1"
                                 max="10"
-                                value={settings?.maxImageSize || 1}
-                                onChange={(e) => updateSystemSettings({ maxImageSize: parseFloat(e.target.value) })}
+                                value={formValues.maxImageSize}
+                                onChange={handleFormChange}
                                 className="input"
                                 disabled={saving}
                             />
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                onClick={handleSaveFileSettings}
+                                disabled={saving || (!formValues.maxImagesPerItem && !formValues.maxImageSize)}
+                                className="btn btn-primary w-full"
+                            >
+                                {saving ? 'Saving...' : 'Save File Settings'}
+                            </button>
                         </div>
                     </div>
                 </div>

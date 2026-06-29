@@ -5,6 +5,9 @@ const morgan = require('morgan');
 const path = require('path');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const maintenanceMode = require('./middleware/maintenance');
+const jwt = require('jsonwebtoken');
+const User = require('./models/User');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -30,6 +33,25 @@ app.use(morgan('dev'));
 
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Pre-route auth check for maintenance mode bypass
+// This allows the maintenance middleware to know if the user is an admin
+app.use(async (req, res, next) => {
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        try {
+            token = req.headers.authorization.split(' ')[1];
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = await User.findById(decoded.id).select('-password');
+        } catch (error) {
+            // Token invalid or expired, proceed as guest
+        }
+    }
+    next();
+});
+
+// Apply maintenance mode check
+app.use(maintenanceMode);
 
 // API Routes
 app.use('/api/auth', authRoutes);

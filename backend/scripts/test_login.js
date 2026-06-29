@@ -20,7 +20,7 @@ const testLogin = async () => {
 
         console.log('✅ User found:', user.name);
         console.log('   Role:', user.role);
-        console.log('   Email Verified:', user.isEmailVerified);
+        console.log('   Verified:', user.verified);
         console.log('   Banned:', user.isBanned);
 
         // Test password

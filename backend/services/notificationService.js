@@ -62,14 +62,17 @@ exports.notifyClaim = async (user, claim, item) => {
  */
 exports.notifyClaimStatus = async (user, claim, item, status) => {
     try {
-        const statusText = status === 'approved' ? 'approved' : 'rejected';
+        const statusText = status === 'approved' ? 'Approved' : 'Rejected';
+        const message = status === 'approved'
+            ? 'Your item is verified. Collect it in the lost and found office.'
+            : `Your claim for "${item.title}" has been rejected`;
 
         // Create in-app notification
         await this.createNotification({
             user: user._id,
             type: 'status',
-            title: `Claim ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
-            message: `Your claim for "${item.title}" has been ${statusText}`,
+            title: `Claim ${statusText}`,
+            message,
             relatedItem: item._id,
             relatedClaim: claim._id
         });
@@ -147,6 +150,21 @@ exports.getUnreadCount = async (userId) => {
         return count;
     } catch (error) {
         console.error('Error getting unread count:', error);
+        throw error;
+    }
+};
+/**
+ * Delete notification
+ */
+exports.deleteNotification = async (notificationId, userId) => {
+    try {
+        const result = await Notification.findOneAndDelete({
+            _id: notificationId,
+            user: userId
+        });
+        return result;
+    } catch (error) {
+        console.error('Error deleting notification:', error);
         throw error;
     }
 };

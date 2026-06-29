@@ -200,7 +200,6 @@ exports.createUser = async (req, res, next) => {
             role: role || 'user',
             department,
             phone,
-            isEmailVerified: true,
             verified: true
         });
 

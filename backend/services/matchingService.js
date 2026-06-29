@@ -98,8 +98,9 @@ exports.findMatches = async (item) => {
             score: calculateMatchScore(item, matchItem)
         }));
 
-        // Filter matches with score >= 40 (minimum threshold)
-        const validMatches = matches.filter(match => match.score >= 40);
+        // Filter matches with score >= 50 (minimum threshold)
+        // This ensures at least one other field (Date, Location, Color, Brand) must match in addition to Category
+        const validMatches = matches.filter(match => match.score >= 50);
 
         // Sort by score (highest first)
         validMatches.sort((a, b) => b.score - a.score);

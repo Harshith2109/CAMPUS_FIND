@@ -110,7 +110,7 @@ const VerifyClaims = () => {
                                     })}>
                                         <img
                                             src={getImageUrl(claim.item?.images?.[0])}
-                                            alt={claim.item?.name}
+                                            alt={claim.item?.title}
                                             className="w-full md:w-64 h-64 object-cover rounded-xl group-hover:opacity-95 transition-all bg-bg-main"
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-[2px] rounded-xl">
@@ -124,17 +124,17 @@ const VerifyClaims = () => {
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
                                             <h3 className="text-2xl font-bold text-text-main">
-                                                Claim for: {claim.item?.name || 'Unknown Item'}
+                                                Claim for: {claim.item?.title || 'Unknown Item'}
                                             </h3>
                                             <div className="flex items-center mt-3">
                                                 <img
-                                                    src={getImageUrl(claim.user?.profilePicture)}
-                                                    alt={claim.user?.name}
+                                                    src={getImageUrl(claim.claimedBy?.profilePicture)}
+                                                    alt={claim.claimedBy?.name}
                                                     className="w-10 h-10 rounded-full border border-border-main mr-3 bg-bg-main object-cover shadow-sm"
                                                 />
                                                 <div>
-                                                    <p className="text-sm font-semibold text-text-main leading-none">{claim.user?.name}</p>
-                                                    <p className="text-xs text-text-muted mt-1">{claim.user?.email}</p>
+                                                    <p className="text-sm font-semibold text-text-main leading-none">{claim.claimedBy?.name}</p>
+                                                    <p className="text-xs text-text-muted mt-1">{claim.claimedBy?.email}</p>
                                                 </div>
                                             </div>
                                             <p className="text-xs text-text-muted mt-3 flex items-center gap-1">

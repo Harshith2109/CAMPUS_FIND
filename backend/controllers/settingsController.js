@@ -32,8 +32,13 @@ exports.updateSettings = async (req, res, next) => {
         if (categories) settings.categories = categories;
         if (typeof allowRegistration !== 'undefined') settings.allowRegistration = allowRegistration;
         if (typeof maintenanceMode !== 'undefined') settings.maintenanceMode = maintenanceMode;
-        if (typeof maxImagesPerItem !== 'undefined') settings.maxImagesPerItem = maxImagesPerItem;
-        if (typeof maxImageSize !== 'undefined') settings.maxImageSize = maxImageSize;
+
+        if (typeof maxImagesPerItem !== 'undefined' && !isNaN(maxImagesPerItem)) {
+            settings.maxImagesPerItem = Number(maxImagesPerItem);
+        }
+        if (typeof maxImageSize !== 'undefined' && !isNaN(maxImageSize)) {
+            settings.maxImageSize = Number(maxImageSize);
+        }
 
         await settings.save();
 

@@ -123,7 +123,7 @@ const Dashboard = () => {
                 <SectionHeader
                     title="My Recent Items"
                     action={
-                        <Link to="/my-items" className="text-brand-primary hover:text-brand-primary-hover font-medium flex items-center gap-1">
+                        <Link to="/my-items" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
                             View All
                             <ChevronRight className="w-4 h-4" />
                         </Link>
@@ -138,10 +138,10 @@ const Dashboard = () => {
                     </div>
                 ) : (
                     <div className="card text-center py-12">
-                        <div className="w-20 h-20 bg-bg-main rounded-full flex-center mx-auto mb-4 border border-border-main">
-                            <PackageOpen className="w-10 h-10 text-text-muted" />
+                        <div className="w-20 h-20 bg-gray-100 rounded-full flex-center mx-auto mb-4">
+                            <PackageOpen className="w-10 h-10 text-gray-400" />
                         </div>
-                        <p className="text-text-muted mb-4 font-medium">You haven't reported any items yet</p>
+                        <p className="text-gray-600 mb-4 font-medium">You haven't reported any items yet</p>
                         <Link to="/report-item" className="btn btn-primary">
                             Report Your First Item
                         </Link>
@@ -154,7 +154,7 @@ const Dashboard = () => {
                 <SectionHeader
                     title="Recent Notifications"
                     action={
-                        <Link to="/notifications" className="text-brand-primary hover:text-brand-primary-hover font-medium flex items-center gap-1">
+                        <Link to="/notifications" className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
                             View All
                             <ChevronRight className="w-4 h-4" />
                         </Link>
@@ -162,19 +162,19 @@ const Dashboard = () => {
                     divided
                 />
                 {notifications.length > 0 ? (
-                    <div className="card divide-y divide-border-main">
+                    <div className="card divide-y divide-gray-200">
                         {notifications.map(notif => (
-                            <div key={notif._id} className={`py-4 px-6 ${!notif.read ? 'bg-brand-primary/10' : 'hover:bg-bg-main'} transition-colors`}>
+                            <div key={notif._id} className={`py-4 px-6 ${!notif.read ? 'bg-primary-50' : 'hover:bg-gray-50'} transition-colors`}>
                                 <div className="flex items-start gap-4">
-                                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex-center ${notif.type === 'match' ? 'bg-brand-success/20 text-brand-success' :
-                                        notif.type === 'claim' ? 'bg-brand-warning/20 text-brand-warning' :
-                                            'bg-brand-primary/20 text-brand-primary'
+                                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex-center ${notif.type === 'match' ? 'bg-success-100 text-success-600' :
+                                        notif.type === 'claim' ? 'bg-warning-100 text-warning-600' :
+                                            'bg-primary-100 text-primary-600'
                                         }`}>
                                         <Bell className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-text-main">{notif.title}</h4>
-                                        <p className="text-sm text-text-muted mt-1">{notif.message}</p>
+                                        <h4 className="font-semibold text-gray-900">{notif.title}</h4>
+                                        <p className="text-sm text-gray-600 mt-1">{notif.message}</p>
                                     </div>
                                 </div>
                             </div>

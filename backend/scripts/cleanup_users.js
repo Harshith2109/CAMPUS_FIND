@@ -14,7 +14,7 @@ const cleanupUsers = async () => {
         });
         console.log('✅ Connected to MongoDB');
 
-        const result = await User.deleteMany({ isEmailVerified: false });
+        const result = await User.deleteMany({ verified: false });
 
         console.log(`✅ Deleted ${result.deletedCount} unverified users.`);
 

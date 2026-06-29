@@ -7,45 +7,50 @@ const Notification = require('../models/Notification');
 
 // Sample data
 const users = [
-    {
-        name: 'Admin User',
-        email: 'harshithhs.sit25@rvce.edu.in',
-        password: 'admin123',
-        role: 'admin',
-        phone: '9876543210',
-        department: 'Administration'
-    },
-    {
-        name: 'Dr. Rajesh Gupta',
-        email: 'rajesh.gupta@rvce.edu.in',
-        password: 'staff123',
-        role: 'staff',
-        phone: '9876543211',
-        department: 'Computer Science'
-    },
-    {
-        name: 'Priya Sharma',
-        email: 'priya@rvce.edu.in',
-        password: 'user123',
-        role: 'student',
-        phone: '9876543212',
-        department: 'Computer Science'
-    },
-    {
-        name: 'Rahul Kumar',
-        email: 'rahul@rvce.edu.in',
-        password: 'user123',
-        role: 'student',
-        phone: '9876543213',
-        department: 'Electronics'
-    },
+    // {
+    //     name: 'Admin User',
+    //     email: 'harshithhs.sit25@rvce.edu.in',
+    //     password: 'admin123',
+    //     role: 'admin',
+    //     phone: '9876543210',
+    //     department: 'Administration',
+    //     verified: true
+    // },
+    // {
+    //     name: 'Dr. Rajesh Gupta',
+    //     email: 'rajesh.gupta@rvce.edu.in',
+    //     password: 'staff123',
+    //     role: 'staff',
+    //     phone: '9876543211',
+    //     department: 'Computer Science',
+    //     verified: true
+    // },
+    // {
+    //     name: 'Priya Sharma',
+    //     email: 'priya@rvce.edu.in',
+    //     password: 'user123',
+    //     role: 'student',
+    //     phone: '9876543212',
+    //     department: 'Computer Science',
+    //     verified: true
+    // },
+    // {
+    //     name: 'Rahul Kumar',
+    //     email: 'rahul@rvce.edu.in',
+    //     password: 'user123',
+    //     role: 'student',
+    //     phone: '9876543213',
+    //     department: 'Electronics',
+    //     verified: true
+    // },
     {
         name: 'Anita Desai',
         email: 'anita@rvce.edu.in',
         password: 'user123',
         role: 'student',
         phone: '9876543214',
-        department: 'Mechanical'
+        department: 'Mechanical',
+        verified: true
     }
 ];
 
@@ -321,9 +326,9 @@ const seedDatabase = async () => {
         await seedNotifications(createdUsers, createdItems);
 
         console.log('\n✨ Database seeding completed successfully!\n');
-        console.log('📝 Sample Credentials:');
-        console.log('   Admin: admin@campusfind.com / admin123');
-        console.log('   User:  priya@student.com / user123\n');
+        // console.log('📝 Sample Credentials:');
+        // console.log('   Admin: admin@campusfind.com / admin123');
+        // console.log('   User:  priya@student.com / user123\n');
 
         process.exit(0);
     } catch (error) {

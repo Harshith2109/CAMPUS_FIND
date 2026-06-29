@@ -26,6 +26,7 @@ const MyItems = () => {
         }
     };
 
+
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this item?')) return;
 
@@ -39,11 +40,15 @@ const MyItems = () => {
     };
 
     const filteredItems = items.filter(item => {
+        if (filter === 'resolved') {
+            return item.status === 'claimed' || item.status === 'returned';
+        }
+
+        // For other tabs (all, lost, found), only show active items
+        if (item.status !== 'active') return false;
+
         if (filter === 'all') return true;
-        if (filter === 'active') return item.status === 'active';
-        if (filter === 'claimed') return item.status === 'claimed';
-        if (filter === 'resolved') return item.status === 'resolved';
-        return true;
+        return item.type === filter;
     });
 
     if (loading) {
@@ -61,10 +66,10 @@ const MyItems = () => {
             {/* Filter Tabs */}
             <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
                 {[
-                    { id: 'all', label: 'All', count: items.length },
-                    { id: 'active', label: 'Active', count: items.filter(i => i.status === 'active').length },
-                    { id: 'claimed', label: 'Claimed', count: items.filter(i => i.status === 'claimed').length },
-                    { id: 'resolved', label: 'Resolved', count: items.filter(i => i.status === 'resolved').length }
+                    { id: 'all', label: 'All Active', count: items.filter(i => i.status === 'active').length },
+                    { id: 'lost', label: 'Lost Items', count: items.filter(i => i.type === 'lost' && i.status === 'active').length },
+                    { id: 'found', label: 'Found Items', count: items.filter(i => i.type === 'found' && i.status === 'active').length },
+                    { id: 'resolved', label: 'Resolved', count: items.filter(i => i.status === 'claimed' || i.status === 'returned').length }
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -81,23 +86,27 @@ const MyItems = () => {
 
             {/* Items Grid */}
             {filteredItems.length > 0 ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredItems.map(item => (
-                        <div key={item._id} className="relative group">
-                            <ItemCard item={item} />
-                            <div className="mt-3 flex gap-2">
+                        <div key={item._id} className="flex flex-col h-full bg-bg-surface border border-border-main rounded-2xl overflow-hidden p-4 hover:shadow-lg transition-all duration-300">
+                            <div className="flex-1">
+                                <ItemCard item={item} plain />
+                            </div>
+                            <div className="mt-4 flex gap-3 pt-4 border-t border-border-main/50">
                                 <Link
                                     to={`/items/${item._id}`}
-                                    className="btn btn-secondary flex-1 text-sm shadow-sm hover:shadow-md transition-all"
+                                    className="btn btn-secondary flex-1 text-xs py-2 px-3 shadow-sm hover:shadow-md transition-all font-bold uppercase tracking-wider"
                                 >
-                                    View Details
+                                    View
                                 </Link>
-                                <button
-                                    onClick={() => handleDelete(item._id)}
-                                    className="btn btn-danger flex-1 text-sm shadow-sm hover:shadow-md transition-all"
-                                >
-                                    Delete
-                                </button>
+                                {filter !== 'resolved' && (
+                                    <button
+                                        onClick={() => handleDelete(item._id)}
+                                        className="btn btn-danger flex-1 text-xs py-2 px-3 shadow-sm hover:shadow-md transition-all font-bold uppercase tracking-wider"
+                                    >
+                                        Delete
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}

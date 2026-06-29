@@ -28,6 +28,8 @@ const AdminDashboard = () => {
         }
     };
 
+    const [showNotice, setShowNotice] = useState(true);
+
     if (loading) return <LoadingSpinner fullScreen />;
 
     return (
@@ -110,11 +112,14 @@ const AdminDashboard = () => {
             </div>
 
             {/* Admin Note Alert */}
-            <Alert
-                type="info"
-                title="Admin Notice"
-                message="As an admin, ensure you review pending claims regularly and maintain system integrity. Check the Verification Page for pending claims."
-            />
+            {showNotice && (
+                <Alert
+                    type="info"
+                    title="Admin Notice"
+                    message="As an admin, ensure you review pending claims regularly and maintain system integrity. Check the Verification Page for pending claims."
+                    onClose={() => setShowNotice(false)}
+                />
+            )}
         </div>
     );
 };

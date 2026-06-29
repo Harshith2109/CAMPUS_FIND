@@ -10,7 +10,7 @@ import FormField from '../components/FormField';
 import ImageModal from '../components/ImageModal';
 import { getSettings } from '../services/adminService';
 import toast from '../utils/toast';
-import { ChevronLeft, ZoomIn, Info } from 'lucide-react';
+import { ChevronLeft, ZoomIn, Info, X } from 'lucide-react';
 
 const ItemDetail = () => {
     const { id } = useParams();
@@ -24,9 +24,10 @@ const ItemDetail = () => {
         maxSizeMB: 1
     });
     const [claimData, setClaimData] = useState({
-        description: '',
+        proofDescription: '',
         proofImages: []
     });
+    const [previewImages, setPreviewImages] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [modalInfo, setModalInfo] = useState({ isOpen: false, index: 0, images: [] });
 
@@ -59,6 +60,12 @@ const ItemDetail = () => {
         fetchUploadSettings();
     }, [fetchItem]);
 
+    const userClaim = item?.claimRequests?.find(claim =>
+        (claim.claimedBy?._id || claim.claimedBy) === (user?._id || user?.id) &&
+        claim.status === 'pending'
+    );
+
+
     const handleClaimSubmit = async (e) => {
         e.preventDefault();
         if (!user) {
@@ -68,7 +75,7 @@ const ItemDetail = () => {
 
         try {
             setSubmitting(true);
-            await createClaim(id, claimData);
+            await createClaim({ itemId: id, ...claimData });
             toast.success('Claim submitted successfully!');
             setShowClaimModal(false);
             fetchItem();
@@ -79,25 +86,62 @@ const ItemDetail = () => {
         }
     };
 
+    const handleCancelClaim = async () => {
+        if (!userClaim) return;
+        if (!window.confirm('Are you sure you want to cancel your claim for this item?')) return;
+
+        try {
+            setSubmitting(true);
+            const { deleteClaim } = await import('../services/claimService');
+            await deleteClaim(userClaim._id);
+            toast.success('Claim cancelled successfully');
+            fetchItem();
+        } catch (error) {
+            toast.error(error, 'Failed to cancel claim');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const handleImageChange = (e) => {
-        const files = Array.from(e.target.files);
+        const newFiles = Array.from(e.target.files);
+        const currentFiles = claimData.proofImages;
 
         // Validate number of files
-        if (files.length > uploadSettings.maxImages) {
+        if (currentFiles.length + newFiles.length > uploadSettings.maxImages) {
             toast.error(`You can only upload a maximum of ${uploadSettings.maxImages} images.`);
             e.target.value = '';
             return;
         }
 
         // Validate file size
-        const oversizedFile = files.find(file => file.size > uploadSettings.maxSizeMB * 1024 * 1024);
+        const oversizedFile = newFiles.find(file => file.size > uploadSettings.maxSizeMB * 1024 * 1024);
         if (oversizedFile) {
             toast.error(`Each image must be smaller than ${uploadSettings.maxSizeMB}MB.`);
             e.target.value = '';
             return;
         }
 
-        setClaimData(prev => ({ ...prev, proofImages: files }));
+        const updatedFiles = [...currentFiles, ...newFiles];
+        setClaimData(prev => ({ ...prev, proofImages: updatedFiles }));
+
+        // Create previews
+        const previews = updatedFiles.map(file => URL.createObjectURL(file));
+        previewImages.forEach(url => URL.revokeObjectURL(url));
+        setPreviewImages(previews);
+
+        // Reset input
+        e.target.value = '';
+    };
+
+    const removeImage = (index) => {
+        const updatedFiles = claimData.proofImages.filter((_, i) => i !== index);
+        const updatedPreviews = previewImages.filter((_, i) => i !== index);
+
+        URL.revokeObjectURL(previewImages[index]);
+
+        setClaimData(prev => ({ ...prev, proofImages: updatedFiles }));
+        setPreviewImages(updatedPreviews);
     };
 
 
@@ -138,7 +182,7 @@ const ItemDetail = () => {
                             })}>
                                 <img
                                     src={getImageUrl(item.images[0])}
-                                    alt={item.name}
+                                    alt={item.title}
                                     className="w-full h-96 object-cover rounded-lg group-hover:opacity-95 transition-opacity"
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-10 rounded-lg">
@@ -157,7 +201,7 @@ const ItemDetail = () => {
                                         })}>
                                             <img
                                                 src={getImageUrl(img)}
-                                                alt={`${item.name} ${idx + 1}`}
+                                                alt={`${item.title} ${idx + 1}`}
                                                 className="w-full h-20 object-cover rounded hover:opacity-80 transition-opacity"
                                             />
                                         </div>
@@ -185,7 +229,7 @@ const ItemDetail = () => {
                             {item.type === 'lost' ? 'Lost Item' : 'Found Item'}
                         </span>
 
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4">{item.name}</h1>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-4">{item.title}</h1>
 
                         <div className="space-y-4 mb-6">
                             <div>
@@ -252,14 +296,45 @@ const ItemDetail = () => {
                             </div>
                         </div>
 
-                        {/* Claim Button */}
-                        {user && item.status === 'active' && (item.reportedBy?._id || item.reportedBy) !== (user._id || user.id) && (
+                        {/* Claim Button - Only for found items */}
+                        {user && item.status === 'active' && item.type === 'found' && (item.reportedBy?._id || item.reportedBy) !== (user._id || user.id) && !userClaim && (
                             <button
                                 onClick={() => setShowClaimModal(true)}
                                 className="btn btn-primary w-full"
                             >
                                 Claim This Item
                             </button>
+                        )}
+
+                        {/* Cancel Claim Button */}
+                        {user && userClaim && (
+                            <div className="space-y-3">
+                                <div className="p-4 bg-brand-warning/10 border border-brand-warning/20 rounded-xl flex items-start gap-3">
+                                    <Info className="w-5 h-5 text-brand-warning flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-brand-warning">Claim Pending</p>
+                                        <p className="text-xs text-text-muted">You have already submitted a claim for this item. It is currently under verification.</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleCancelClaim}
+                                    disabled={submitting}
+                                    className="btn btn-danger w-full outline outline-1 outline-brand-danger/20"
+                                >
+                                    {submitting ? 'Cancelling...' : 'Cancel My Claim'}
+                                </button>
+                            </div>
+                        )}
+
+
+                        {/* If it's a lost item, show a message instead of claim */}
+                        {user && item.status === 'active' && item.type === 'lost' && (item.reportedBy?._id || item.reportedBy) !== (user._id || user.id) && (
+                            <div className="bg-bg-main p-4 rounded-xl border border-border-main text-center">
+                                <p className="text-sm text-text-muted mb-3">If you have found this item, please report it as a found item to help the owner.</p>
+                                <Link to="/report-item?type=found" className="btn btn-outline w-full">
+                                    Report as Found
+                                </Link>
+                            </div>
                         )}
 
                         {!user && (
@@ -274,13 +349,19 @@ const ItemDetail = () => {
             {/* Claim Modal */}
             {showClaimModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-md w-full p-6">
-                        <h2 className="text-2xl font-bold mb-4">Claim Item</h2>
+                    <div className="bg-bg-surface rounded-2xl max-w-md w-full p-8 shadow-xl border border-border-main relative">
+                        <button
+                            onClick={() => setShowClaimModal(false)}
+                            className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-main transition-colors"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
+                        <h2 className="text-2xl font-bold mb-6 text-text-main">Claim Item</h2>
                         <form onSubmit={handleClaimSubmit}>
                             <FormField label="Describe why this is your item" required>
                                 <textarea
-                                    value={claimData.description}
-                                    onChange={(e) => setClaimData(prev => ({ ...prev, description: e.target.value }))}
+                                    value={claimData.proofDescription}
+                                    onChange={(e) => setClaimData(prev => ({ ...prev, proofDescription: e.target.value }))}
                                     className="input"
                                     rows="4"
                                     required
@@ -305,8 +386,25 @@ const ItemDetail = () => {
                                     multiple
                                     accept="image/*"
                                     onChange={handleImageChange}
-                                    className="input"
+                                    className="input mb-4"
                                 />
+
+                                {previewImages.length > 0 && (
+                                    <div className="grid grid-cols-4 gap-2 mb-4">
+                                        {previewImages.map((url, idx) => (
+                                            <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-border-main">
+                                                <img src={url} className="w-full h-full object-cover" alt="Proof" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeImage(idx)}
+                                                    className="absolute top-0.5 right-0.5 bg-red-500 text-white p-0.5 rounded-full shadow-sm hover:bg-red-600 transition-colors"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </FormField>
 
                             <div className="flex gap-4">

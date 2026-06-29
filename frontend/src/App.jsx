@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
@@ -21,9 +22,12 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
 import AdminSettings from './pages/AdminSettings';
 import Profile from './pages/Profile';
+import Maintenance from './pages/Maintenance';
+import api from './services/api';
 
-import { Toaster } from 'react-hot-toast';
+import { Toaster, ToastBar, toast as hotToast } from 'react-hot-toast';
 import { ThemeProvider } from './context/ThemeContext';
+import { X } from 'lucide-react';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -36,17 +40,50 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  useEffect(() => {
+    const checkMaintenance = async () => {
+      try {
+        await api.get('/health');
+      } catch (error) {
+        // If 503 maintenance, api interceptor will handle redirect
+        // This heartbeat just triggers that logic on mount
+      }
+    };
+    checkMaintenance();
+  }, []);
+
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Router>
-            <Toaster position="top-right" />
+            <Toaster position="top-right">
+              {(t) => (
+                <ToastBar toast={t}>
+                  {({ icon, message }) => (
+                    <>
+                      {icon}
+                      {message}
+                      {t.type !== 'loading' && (
+                        <button
+                          onClick={() => hotToast.dismiss(t.id)}
+                          className="ml-2 p-1 rounded-full hover:bg-black/10 transition-colors"
+                          title="Dismiss"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </ToastBar>
+              )}
+            </Toaster>
             <div className="min-h-screen bg-bg-main text-text-main">
               <Navbar />
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
+                <Route path="/maintenance" element={<Maintenance />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />

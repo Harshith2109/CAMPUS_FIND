@@ -10,13 +10,13 @@ const {
     getClaimStats
 } = require('../controllers/claimController');
 const { protect, authorize } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { upload, validateLimits } = require('../middleware/upload');
 
 // All routes are protected
 router.use(protect);
 
 // User routes
-router.post('/', upload.array('proofImages', 3), createClaim);
+router.post('/', upload.array('proofImages'), validateLimits('proofImages'), createClaim);
 router.get('/', getClaims);
 router.get('/user/my-claims', getMyClaims);
 router.get('/:id', getClaimById);

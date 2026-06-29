@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { createItem } from '../services/itemService';
 import { getSettings } from '../services/adminService';
 import ImageModal from '../components/ImageModal';
@@ -9,18 +9,25 @@ import {
     Info,
     ZoomIn,
     PackagePlus,
-    CirclePlus
+    CirclePlus,
+    X
 } from 'lucide-react';
 
 const ReportItem = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Parse query parameters
+    const queryParams = new URLSearchParams(location.search);
+    const initialType = queryParams.get('type') === 'found' ? 'found' : 'lost';
+
     const [categories, setCategories] = useState([]);
     const [uploadSettings, setUploadSettings] = useState({
         maxImages: 5,
         maxSizeMB: 1
     });
     const [formData, setFormData] = useState({
-        type: 'lost',
+        type: initialType,
         title: '',
         category: '',
         description: '',
@@ -61,28 +68,46 @@ const ReportItem = () => {
     };
 
     const handleImageChange = (e) => {
-        const files = Array.from(e.target.files);
+        const newFiles = Array.from(e.target.files);
+        const currentFiles = formData.images;
 
-        // Validate number of files
-        if (files.length > uploadSettings.maxImages) {
+        // Check if adding these files would exceed the limit
+        if (currentFiles.length + newFiles.length > uploadSettings.maxImages) {
             toast.error(`You can only upload a maximum of ${uploadSettings.maxImages} images.`);
             e.target.value = '';
             return;
         }
 
-        // Validate file size
-        const oversizedFile = files.find(file => file.size > uploadSettings.maxSizeMB * 1024 * 1024);
+        // Validate file size for new files
+        const oversizedFile = newFiles.find(file => file.size > uploadSettings.maxSizeMB * 1024 * 1024);
         if (oversizedFile) {
             toast.error(`Each image must be smaller than ${uploadSettings.maxSizeMB} MB.`);
             e.target.value = '';
             return;
         }
 
-        setFormData(prev => ({ ...prev, images: files }));
+        const updatedFiles = [...currentFiles, ...newFiles];
+        setFormData(prev => ({ ...prev, images: updatedFiles }));
 
-        // Create preview URLs
-        const previews = files.map(file => URL.createObjectURL(file));
+        // Create preview URLs for all files
+        const previews = updatedFiles.map(file => URL.createObjectURL(file));
+        // Revoke old URLs to prevent memory leaks
+        previewImages.forEach(url => URL.revokeObjectURL(url));
         setPreviewImages(previews);
+
+        // Reset input so the same file can be picked again if removed
+        e.target.value = '';
+    };
+
+    const removeImage = (index) => {
+        const updatedFiles = formData.images.filter((_, i) => i !== index);
+        const updatedPreviews = previewImages.filter((_, i) => i !== index);
+
+        // Revoke the URL of the removed image
+        URL.revokeObjectURL(previewImages[index]);
+
+        setFormData(prev => ({ ...prev, images: updatedFiles }));
+        setPreviewImages(updatedPreviews);
     };
 
     const handleSubmit = async (e) => {
@@ -288,6 +313,17 @@ const ReportItem = () => {
                                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-[2px]">
                                             <ZoomIn className="w-6 h-6 text-white" />
                                         </div>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeImage(idx);
+                                            }}
+                                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-lg hover:bg-red-600 transition-colors z-10"
+                                            title="Remove image"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>

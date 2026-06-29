@@ -9,17 +9,17 @@ const StatCard = ({
     className = ''
 }) => {
     const colorClasses = {
-        primary: 'bg-primary-50 border-primary-100 dark:bg-primary-900/20 dark:border-primary-800',
-        success: 'bg-success-50 border-success-100 dark:bg-success-900/20 dark:border-success-800',
-        warning: 'bg-warning-50 border-warning-100 dark:bg-warning-900/20 dark:border-warning-800',
-        danger: 'bg-danger-50 border-danger-100 dark:bg-danger-900/20 dark:border-danger-800'
+        primary: 'bg-brand-primary/10 border-brand-primary/20',
+        success: 'bg-brand-success/10 border-brand-success/20',
+        warning: 'bg-brand-warning/10 border-brand-warning/20',
+        danger: 'bg-brand-danger/10 border-brand-danger/20'
     };
 
     const iconColorClasses = {
-        primary: 'text-primary-600 dark:text-primary-400',
-        success: 'text-success-600 dark:text-success-400',
-        warning: 'text-warning-600 dark:text-warning-400',
-        danger: 'text-danger-600 dark:text-danger-400'
+        primary: 'text-brand-primary',
+        success: 'text-brand-success',
+        warning: 'text-brand-warning',
+        danger: 'text-brand-danger'
     };
 
     return (

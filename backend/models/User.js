@@ -49,10 +49,6 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false // User must verify email first
     },
-    isEmailVerified: {
-        type: Boolean,
-        default: false // Email verification status
-    },
     isBanned: {
         type: Boolean,
         default: false

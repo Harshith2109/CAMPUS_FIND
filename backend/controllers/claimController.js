@@ -22,11 +22,18 @@ exports.createClaim = async (req, res, next) => {
             });
         }
 
-        // Check if item is active
+        // Check if item is active and of type 'found'
         if (item.status !== 'active') {
             return res.status(400).json({
                 success: false,
                 message: 'This item is no longer available for claims'
+            });
+        }
+
+        if (item.type !== 'found') {
+            return res.status(400).json({
+                success: false,
+                message: 'You can only claim items that have been reported as found'
             });
         }
 
@@ -114,7 +121,7 @@ exports.getClaims = async (req, res, next) => {
 
         const claims = await Claim.find(query)
             .populate('claimedBy', 'name email phone department profilePicture')
-            .populate('item', 'title type category location images reportedBy')
+            .populate('item', 'title type category location images reportedBy status')
             .populate('verifiedBy', 'name email')
             .sort({ createdAt: -1 })
             .skip(skip)
