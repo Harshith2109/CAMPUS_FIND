@@ -8,9 +8,9 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import SectionHeader from '../components/SectionHeader';
 import FormField from '../components/FormField';
 import ImageModal from '../components/ImageModal';
-import { getSettings } from '../services/adminService';
+import { getSettings, updateItemStatus } from '../services/adminService';
 import toast from '../utils/toast';
-import { ChevronLeft, ZoomIn, Info, X } from 'lucide-react';
+import { ChevronLeft, ZoomIn, Info, X, Shield } from 'lucide-react';
 
 const ItemDetail = () => {
     const { id } = useParams();
@@ -341,6 +341,43 @@ const ItemDetail = () => {
                             <Link to="/login" className="btn btn-primary w-full">
                                 Login to Claim
                             </Link>
+                        )}
+
+                        {/* Admin Moderation Panel */}
+                        {user && user.role === 'admin' && (
+                            <div className="mt-6 p-4 bg-brand-warning/10 border border-brand-warning/20 rounded-xl">
+                                <h3 className="text-sm font-semibold text-brand-warning flex items-center gap-2 mb-3">
+                                    <Shield className="w-5 h-5" />
+                                    Admin Moderation Panel
+                                </h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-text-muted mb-1">Moderate Item Status</label>
+                                        <select
+                                            value={item.status}
+                                            onChange={async (e) => {
+                                                try {
+                                                    setSubmitting(true);
+                                                    await updateItemStatus(item._id, e.target.value);
+                                                    toast.success('Item status updated successfully!');
+                                                    fetchItem();
+                                                } catch (error) {
+                                                    toast.error(error, 'Failed to update status');
+                                                } finally {
+                                                    setSubmitting(false);
+                                                }
+                                            }}
+                                            disabled={submitting}
+                                            className="input bg-bg-surface text-text-main"
+                                        >
+                                            <option value="active">Active</option>
+                                            <option value="claimed">Claimed</option>
+                                            <option value="returned">Returned</option>
+                                            <option value="archived">Archived</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>
