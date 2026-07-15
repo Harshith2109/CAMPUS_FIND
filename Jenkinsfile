@@ -82,7 +82,10 @@ pipeline {
             steps {
                 script {
                     echo "Deploying CampusFind update to Azure Virtual Machine..."
-                    withCredentials([sshUserPrivateKey(credentialsId: "${SSH_CREDS_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+                    withCredentials([
+                        sshUserPrivateKey(credentialsId: "${SSH_CREDS_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
+                        file(credentialsId: 'campusfind-prod-env', variable: 'ENV_FILE')
+                    ]) {
                         if (!isUnix()) {
                             // Windows OpenSSH requires strict private key file permissions
                             echo "Securing temporary SSH key file permissions for Windows..."
@@ -98,7 +101,10 @@ pipeline {
                         // 2. Copy Docker Compose config to target directory
                         runCmd "scp -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no docker-compose.prod.yml ${SSH_USER}@${AZURE_VM_PRIVATE_IP}:/home/${SSH_USER}/campus-find/docker-compose.yml"
                         
-                        // 3. Fetch remote deployment variables and login remote docker to ACR
+                        // 3. Copy the secure .env file to the target directory
+                        runCmd "scp -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no \"${ENV_FILE}\" ${SSH_USER}@${AZURE_VM_PRIVATE_IP}:/home/${SSH_USER}/campus-find/.env"
+
+                        // 4. Fetch remote deployment variables and login remote docker to ACR
                         withCredentials([usernamePassword(credentialsId: "${ACR_CREDS_ID}", usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
                             runCmd "ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no ${SSH_USER}@${AZURE_VM_PRIVATE_IP} \"docker login ${ACR_REGISTRY} -u ${ACR_USER} -p ${ACR_PASS} && cd /home/${SSH_USER}/campus-find && docker compose pull && docker compose up -d --remove-orphans && docker image prune -f\""
                         }
