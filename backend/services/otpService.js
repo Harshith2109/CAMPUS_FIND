@@ -18,6 +18,7 @@ exports.createOTP = async (email) => {
 
         const otp = generateOTP();
         const expiryTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        console.log(`🔑 [DEBUG] Generated OTP for ${lowerEmail}: ${otp}`);
 
         const otpDocument = await OTP.create({
             email: lowerEmail,
@@ -72,8 +73,9 @@ exports.verifyOTP = async (email, otp) => {
             };
         }
 
-        // Verify OTP
-        if (otpDocument.otp !== String(otp)) {
+        // Verify OTP (allow 123456 as bypass in development/sandbox mode)
+        const isBypass = process.env.NODE_ENV !== 'production' && String(otp) === '123456';
+        if (otpDocument.otp !== String(otp) && !isBypass) {
             otpDocument.attempts += 1;
             await otpDocument.save();
             return {
