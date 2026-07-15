@@ -153,7 +153,7 @@ const VerifyClaims = () => {
                                             <div className="text-sm space-y-2 text-text-muted bg-bg-main/50 p-4 rounded-xl border border-border-main/50">
                                                 <p><span className="font-semibold text-text-main">Category:</span> {claim.item?.category}</p>
                                                 <p><span className="font-semibold text-text-main">Location:</span> {claim.item?.location}</p>
-                                                <p><span className="font-semibold text-text-main">Date Found:</span> {new Date(claim.item?.dateFound).toLocaleDateString()}</p>
+                                                <p><span className="font-semibold text-text-main">Date Reported:</span> {claim.item?.date ? new Date(claim.item.date).toLocaleDateString() : 'N/A'}</p>
                                             </div>
                                         </div>
                                         <div className="space-y-4">
