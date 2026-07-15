@@ -102,7 +102,7 @@ export const getImageUrl = (imagePath) => {
     // Remove 'uploads/' prefix if it exists in the path to avoid duplication
     const cleanPath = normalizedPath.startsWith('uploads/') ? normalizedPath.replace('uploads/', '') : normalizedPath;
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const API_URL = import.meta.env.VITE_API_URL || '/api';
     const baseUrl = API_URL.replace('/api', '');
 
     return `${baseUrl}/uploads/${cleanPath}`;

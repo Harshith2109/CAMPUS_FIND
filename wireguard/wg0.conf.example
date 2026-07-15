@@ -1,0 +1,10 @@
+[Interface]
+PrivateKey = <YOUR_CLIENT_PRIVATE_KEY_HERE_e.g._ePAAwkFbR2PCQj8En1ZKDsgy6nPyk+iKp4tlLMrZenk=>
+Address = 10.8.0.2/24
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = <YOUR_AZURE_VM_SERVER_PUBLIC_KEY_HERE_e.g._JbbBGtuJ0Yk+b2fRrgOBDx2hfOuIkTZxv5fZxMGLjU8=>
+Endpoint = 40.81.226.88:51820
+AllowedIPs = 10.8.0.0/24
+PersistentKeepalive = 25

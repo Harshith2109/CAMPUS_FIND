@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: campusfind-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - campusfind-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campusfind-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/campusfind
+      - JWT_SECRET=your_jwt_secret_key_here_change_in_production
+      - JWT_EXPIRE=24h
+      - NODE_ENV=development
+      # Optional: Nodemailer config for dev
+      - EMAIL_SERVICE=gmail
+      - EMAIL_USER=test@gmail.com
+      - EMAIL_PASSWORD=testpassword
+      - EMAIL_FROM=CampusFind <noreply@rvce.edu.in>
+      - ADMIN_ACCOUNTS='[{"email":"admin@rvce.edu.in","password":"StrongPassword123!"}]'
+    volumes:
+      - uploads-data:/usr/src/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - campusfind-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: campusfind-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - campusfind-network
+
+volumes:
+  mongo-data:
+  uploads-data:
+
+networks:
+  campusfind-network:
+    driver: bridge
