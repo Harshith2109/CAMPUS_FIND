@@ -16,6 +16,7 @@ services:
     image: taskflowregistry.azurecr.io/campusfind-backend:latest
     container_name: campusfind-backend
     restart: always
+    command: sh -c "node setup.js && node server.js"
     ports:
       - "5000:5000"
     env_file:
