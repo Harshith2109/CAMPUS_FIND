@@ -95,16 +95,19 @@ pipeline {
                             bat "icacls.exe \"${SSH_KEY}\" /grant:r \"*S-1-5-32-544:(R)\" || exit 0"
                         }
                         
-                        // 1. Create target directory on VM
+                        // 1. Clean up old root-level deployment on VM if it exists
+                        runCmd "ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no ${SSH_USER}@${AZURE_VM_PRIVATE_IP} \"docker compose -f /home/${SSH_USER}/docker-compose.yml down --remove-orphans && rm -f /home/${SSH_USER}/docker-compose.yml || true\""
+
+                        // 2. Create target directory on VM
                         runCmd "ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no ${SSH_USER}@${AZURE_VM_PRIVATE_IP} \"mkdir -p /home/${SSH_USER}/campus-find\""
 
-                        // 2. Copy Docker Compose config to target directory
+                        // 3. Copy Docker Compose config to target directory
                         runCmd "scp -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no docker-compose.prod.yml ${SSH_USER}@${AZURE_VM_PRIVATE_IP}:/home/${SSH_USER}/campus-find/docker-compose.yml"
                         
-                        // 3. Copy the secure .env file to the target directory
+                        // 4. Copy the secure .env file to the target directory
                         runCmd "scp -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no \"${ENV_FILE}\" ${SSH_USER}@${AZURE_VM_PRIVATE_IP}:/home/${SSH_USER}/campus-find/.env"
 
-                        // 4. Fetch remote deployment variables and login remote docker to ACR
+                        // 5. Fetch remote deployment variables and login remote docker to ACR
                         withCredentials([usernamePassword(credentialsId: "${ACR_CREDS_ID}", usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
                             runCmd "ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no ${SSH_USER}@${AZURE_VM_PRIVATE_IP} \"docker login ${ACR_REGISTRY} -u ${ACR_USER} -p ${ACR_PASS} && cd /home/${SSH_USER}/campus-find && docker compose pull && docker compose up -d --remove-orphans && docker image prune -f\""
                         }
