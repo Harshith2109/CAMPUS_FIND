@@ -3,7 +3,7 @@ import { getAllUsers, createUser, updateUserRole, deleteUser, toggleUserBan } fr
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from '../utils/toast';
 import PasswordField from '../components/PasswordField';
-import { UserPlus, UserSearch, Ban, Trash2, CircleCheck, CircleAlert, Shield } from 'lucide-react';
+import { UserPlus, UserSearch, Ban, Trash2, CircleCheck, CircleAlert, Shield, X } from 'lucide-react';
 
 const AdminUsers = () => {
     const [users, setUsers] = useState([]);
