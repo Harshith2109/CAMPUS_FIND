@@ -55,11 +55,13 @@ pipeline {
                             echo "Executing Unix-native WireGuard interface establishment..."
                             sh "sudo cp -f ${WG_CONFIG_PATH} /etc/wireguard/wg0.conf"
                             sh "sudo wg-quick up wg0 || true"
+                            sh "sleep 10"
                         } else {
                             echo "Executing Windows-native WireGuard service installation..."
                             bat "copy \"${WG_CONFIG_PATH}\" \"${WORKSPACE}\\wg0.conf\""
                             bat "\"C:\\Program Files\\WireGuard\\wireguard.exe\" /uninstalltunnelservice wg0 || exit 0"
                             bat "\"C:\\Program Files\\WireGuard\\wireguard.exe\" /installtunnelservice \"${WORKSPACE}\\wg0.conf\" || exit 0"
+                            bat "ping 127.0.0.1 -n 11 > nul"
                         }
                     }
                 }
