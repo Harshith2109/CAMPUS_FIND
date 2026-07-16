@@ -112,7 +112,7 @@ pipeline {
 
                         // 5. Fetch remote deployment variables and login remote docker to ACR
                         withCredentials([usernamePassword(credentialsId: "${ACR_CREDS_ID}", usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
-                            runCmd "ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no ${SSH_USER}@${AZURE_VM_PRIVATE_IP} \"docker login ${ACR_REGISTRY} -u ${ACR_USER} -p ${ACR_PASS} && cd /home/${SSH_USER}/campus-find && docker compose pull && docker compose up -d --remove-orphans && sleep 3 && docker compose logs backend && (docker compose exec -T backend node scripts/test-email.js || true) && docker image prune -f\""
+                            runCmd "ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no ${SSH_USER}@${AZURE_VM_PRIVATE_IP} \"docker login ${ACR_REGISTRY} -u ${ACR_USER} -p ${ACR_PASS} && cd /home/${SSH_USER}/campus-find && docker compose pull && docker compose up -d --remove-orphans && docker image prune -f\""
                         }
                     }
                 }
